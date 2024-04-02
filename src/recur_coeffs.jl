@@ -11,7 +11,7 @@ function recur_coeff(w_fn, supp,N_coeff,Nquad)
 end
 
 
-#w_fn(t) = t * exp(-t);  ## weight function leading to associated Laguerre polynomials
+#w_fn(t) ## weight function 
 #supp = (0, 1000)   ## support of the weight function
 #Nquad = 1000;         ## Number of quadrature points
 #ab = recur_coeff(w_fn,supp,N_coeff,Nquad)

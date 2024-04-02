@@ -5,12 +5,15 @@
 
 function init_state(s_total)
     
-    tot_chain = length(s_total)
+    #= tot_chain = length(s_total)
     S_pos_tilde = Int(tot_chain/2)
-    S_pos_real = S_pos_tilde + 1
+    S_pos_real = S_pos_tilde + 1 =#
+    N_chain = length(s_total)-1
     
-    state = [(n == S_pos_real) ? "ρ" : (n < S_pos_real) ? "Id" : "0" for n = 1:tot_chain]
-    RHO_0 = MPO(s_total,state)
+#=     state = [(n == S_pos_real) ? "ρ" : (n < S_pos_real) ? "Id" : "0" for n = 1:tot_chain]
+ =#    
+ state = [(n == 1) ? "ρ" : "0" for n = 1:N_chain+1]
+ RHO_0 = MPO(s_total,state)
 
     return RHO_0
 end

@@ -45,10 +45,10 @@ ITensors.op(::OpName"RHO", ::SiteType"S=3/2") = RHO
 cutoff = 1E-8
 maxdim = 100
 tau = 10^-2             ## time step duration
-nt = 10
+nt = 3
 ttotal = nt*tau             ## TOTAL TIME evolution
 
-N_chain = 10            ## Number of chain sites for single chain-transformed environment
+N_chain = 3            ## Number of chain sites for single chain-transformed environment
 tot_chain = 2*(N_chain+1)
 #= n1_bsn_dim = 6;
 boson_dim = [n1_bsn_dim-round(Int64,(n1_bsn_dim-1.6)*(i-1)/(N_chain-1)) for i = 1:N_chain]           ## Dimension of chain sites
@@ -59,7 +59,9 @@ boson_dim = 3
 S_pos_tilde = N_chain+1
 S_pos_real = N_chain+2
 #s_total = [(n == S_pos) ? Index(4, "S=3/2") : Index(boson_dim, "Qudit") for n = 1:tot_chain]
-s_total = [(n == S_pos_tilde) | (n == S_pos_real) ? Index(2, "S=1/2") : Index(boson_dim, "Qudit") for n = 1:tot_chain]
+#
+#s_total = [(n == S_pos_tilde) | (n == S_pos_real) ? Index(2, "S=1/2") : Index(boson_dim, "Qudit") for n = 1:tot_chain]
+s_total = [(n == 1) ? Index(2, "S=1/2") : Index(boson_dim, "Qudit") for n = 1:(N_chain+1)]
 
 
 zer0 = zeros(boson_dim,boson_dim)

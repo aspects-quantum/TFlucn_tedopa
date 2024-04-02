@@ -10,14 +10,17 @@
 ##############################################################################################################
 function exp_xHB(ω_C, ab1, x, s_total)
 
-    #s_total = [(n == S_pos) ? Index(2, "S=3/2") : Index(boson_dim, "Qudit") for n = 1:tot_chain]
+    #s_total = [(n == S_pos_tilde) | (n == S_pos_real) ? Index(2, "S=1/2") : Index(boson_dim, "Qudit") for n = 1:tot_chain]
 
-    tot_chain = length(s_total)
-    S_pos_real = Int(tot_chain/2 + 1)
+
+    #= tot_chain = length(s_total) =#
+    N_chain = length(s_total)-1
+    #S_pos_real = Int(tot_chain/2 + 1)
 
     gates = ITensor[]
     i = 1
-    for j in S_pos_real+1:tot_chain-1
+    #for j in S_pos_real+1:tot_chain-1
+    for j in 2:N_chain-1
         s1 = s_total[j]
         s2 = s_total[j+1]
 
@@ -63,17 +66,20 @@ end
 ##########################################################################
 function unit_real(ω_0,Ω,c_0,ω_C, ab1, tau, s_total)
 
-    tot_chain = length(s_total)
-    S_pos_real = Int(tot_chain/2 + 1)
+    #= tot_chain = length(s_total) =#
+    N_chain = length(s_total)-1
+    #S_pos_real = Int(tot_chain/2 + 1)
 
     gates = ITensor[]
     i=1
-    for j in S_pos_real:tot_chain-1
+    #= for j in S_pos_real:tot_chain-1 =#
+    for j in 1:N_chain-1
         s1 = s_total[j]
         s2 = s_total[j+1]
 
-        if j == S_pos_real
-            hj = ω_0 * op("Sz", s1) * op("Id", s2)  +
+#=         if j == S_pos_real
+ =#    if j == 1       
+                hj = ω_0 * op("Sz", s1) * op("Id", s2)  +
                  Ω * op("Sx", s1) * op("Id", s2)   +
                  c_0 * op("Sz", s1) * op("A", s2) +
                  c_0 * op("Sz", s1) * op("Adag", s2)
