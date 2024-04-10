@@ -62,5 +62,5 @@ You may notice that some scripts start with the commands:
 using DrWatson
 @quickactivate :flucn_tedopa
 ```
-which auto-activate the project "SBfluctuations" and enable local path handling from DrWatson.
+which auto-activate the project "flucn_tedopa" and enable local path handling from DrWatson.
 *****************************************************************************
