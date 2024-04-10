@@ -1,4 +1,4 @@
-## Heat fluctuations in Spin-Boson model
+## Heat fluctuations using TEDOPA 
 
 This is a package[^SBmodel] for calculating moments of heat transfer in the Spin-Boson model[^PRX2020] using the **Time Evolving Density matrices using Orthogonal Polynomial Algorithm (_TEDOPA_)**[^Prior2010][^Chin2010]. 
 
