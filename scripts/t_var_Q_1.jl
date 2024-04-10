@@ -86,7 +86,7 @@ for T = T_list
 
     #mean_Q = (-im)*(log(chi_pu)-log(chi_mu))/(2*u)
 
-    var_Q = (-1)*(log.(chi_pu)+log.(chi_mu))/(u^2)
+    var_Q = (-4)*(log.(chi_pu)+log.(chi_mu))/(u^2)
     #mean_Q = imag.(chi_pu)/u
 
     plot!(t_list,real(var_Q),label= "T = $T, α = 0.1")
