@@ -56,7 +56,7 @@ u = 0.001 # counting field parameter
 p=plot()
 
 t_list = collect(0:1:nt)*tau
-T_list = [0.1,1]
+T_list = [0.1]
 α = .1
 
 #cat(a, b) = reshape(append!(vec(a), vec(b)), size(a)[1:end-1]..., :)
@@ -80,14 +80,11 @@ for T = T_list
     ab2 = recur_coeff(w_fn2, supp, N_coeff, Nquad)    ## recurrence coefficients for for tilde space bath
 
 
+    chi_2pu = charfn(ω_0, Ω, c_01, c_02, ab1, ab2, s_total, tau, nt, 2*u, cutoff, maxdim)
     chi_pu = charfn(ω_0, Ω, c_01, c_02, ab1, ab2, s_total, tau, nt, u, cutoff, maxdim)
-    chi_mu = charfn(ω_0, Ω, c_01, c_02, ab1, ab2, s_total, tau, nt, -u, cutoff, maxdim)
-    chi_0 = ones(length(chi_mu),1)
+    #chi_0 = ones(length(chi_pu),1)
 
-    #mean_Q = (-im)*(log(chi_pu)-log(chi_mu))/(2*u)
-
-    var_Q = (-4)*(log.(chi_pu)+log.(chi_mu))/(u^2)
-    #mean_Q = imag.(chi_pu)/u
+    var_Q = -(log.(chi_2pu)-2*log.(chi_pu))/(u^2)
 
     plot!(t_list,real(var_Q),label= "T = $T, α = 0.1")
     @show var_Q
@@ -103,5 +100,5 @@ title!(title)
 display("image/png", p)
 
 
-a = "varq_1.png";
+a = "varq_2.png";
 savefig(a)

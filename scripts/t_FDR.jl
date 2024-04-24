@@ -79,14 +79,14 @@ for T in T_list
     ab1 = recur_coeff(w_fn1, supp, N_coeff, Nquad)    ## recurrence coefficients for for real space bath
     ab2 = recur_coeff(w_fn2, supp, N_coeff, Nquad)    ## recurrence coefficients for for tilde space bath
 
-
+    chi_2pu = charfn(ω_0, Ω, c_01, c_02, ab1, ab2, s_total, tau, nt, 2*u, cutoff, maxdim)
     chi_pu = charfn(ω_0, Ω, c_01, c_02, ab1, ab2, s_total, tau, nt, u, cutoff, maxdim)
-    chi_mu = charfn(ω_0, Ω, c_01, c_02, ab1, ab2, s_total, tau, nt, -u, cutoff, maxdim)
+    #chi_mu = charfn(ω_0, Ω, c_01, c_02, ab1, ab2, s_total, tau, nt, -u, cutoff, maxdim)
     #chi_0 = ones(length(chi_mu),1)
 
     mean_Q = real(imag(last(chi_pu))/u)
 
-    var_Q = real((-4)*(log(last(chi_pu))+log(last(chi_mu)))/(u^2))
+    var_Q = real(-(log(last(chi_2pu)) - 2*log(last(chi_pu)))/(u^2))
     #mean_Q = imag.(chi_pu)/u
 
     push!(FDR, var_Q/(T*mean_Q))
