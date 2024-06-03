@@ -20,8 +20,8 @@ ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = ρ
 ## time evolution parameters
 cutoff = 1E-8
 maxdim = 900
-tau = 10^-2             ## time step duration
-nt = 190
+tau = 5*10^-3             ## time step duration
+nt = 300
 ttotal = nt*tau             ## TOTAL TIME evolution
 
 N_chain = 110            ## Number of chain sites for single chain-transformed environment
@@ -49,16 +49,16 @@ T = .1;                  ## temperature of bath
 β = 1/T 
 ###
 
-u = 0.01 # counting field parameter
+u = 0.001 # counting field parameter
 
 
 ## 
 
-#p=plot()
+p=plot()
 
 t_list = collect(0:1:nt)*tau
 #α_list = [0.1,1.5]
-α = 1.5
+α = 1.2
 
 #cat(a, b) = reshape(append!(vec(a), vec(b)), size(a)[1:end-1]..., :)
 support_cutoff = 7*10^2
@@ -94,7 +94,7 @@ n(k) = 1/(exp(β*k) - 1)
 
     #chi_pu = charfn(ω_0, Ω, c_01, c_02, ab1, ab2, s_total, tau, nt, u, cutoff, maxdim)
 
-    count_dates = exp_xHB(ab1, im*u, s_total);
+    #= count_dates = exp_xHB(ab1, im*u, s_total);
     evol = unit_gates(ω_0, Ω, c_01, c_02, ab1, ab2, tau, s_total)
 
     ################################################################################################
@@ -113,7 +113,7 @@ n(k) = 1/(exp(β*k) - 1)
 
     for t = 1:1:nt
 
-        U_ρ_Ud = apply(evol, U_ρ_Ud; cutoff, maxdim, apply_dag=true)
+        global U_ρ_Ud = apply(evol, U_ρ_Ud; cutoff, maxdim, apply_dag=true)
         cd_U_ρ_Ud = apply(count_dates, U_ρ_Ud; cutoff, maxdim)
 
         chi = tr(cd_U_ρ_Ud)[1]
@@ -125,24 +125,31 @@ n(k) = 1/(exp(β*k) - 1)
 
     end
 
-
+ =#
+ chi_pu = charfn(ω_0, Ω, c_01, c_02, ab1, ab2, s_total, tau, nt, u, cutoff, maxdim)
+    
     mean_Q = imag.(chi_pu)/u
     @show real(mean_Q)
 
     #plot!(t_list,real(mean_Q),label= "α = $α")
 
-    plot!((collect(0:1:length(mean_Q)-1)*tau)[begin:10:end],real(mean_Q)[begin:10:end],label= "α = $α")
+    plot!((collect(0:1:length(mean_Q)-1)*tau)[begin:10:end],real(mean_Q)[begin:10:end], lw=4,label= L"$\langle Q\rangle$")
     #plot!((collect(0:1:length(mean_Q)-1)*tau),real(mean_Q),label= "α = $α")
 #end
+    chi_2pu = charfn(ω_0, Ω, c_01, c_02, ab1, ab2, s_total, tau, nt, 2*u, cutoff, maxdim)
 
+
+    var_Q = -(log.(chi_2pu)-2*log.(chi_pu))/(u^2)
+
+    plot!((collect(0:1:length(var_Q)-1)*tau)[begin:10:end],real(var_Q)[begin:10:end], lw=4, label= L"$\langle \langle Q \rangle \rangle$")
 
 plot!(legend=:topright)
-xlabel!("t")
-title = string("<Q>, N_ch = ", N_chain,", b_dim = ", boson_dim,", u = ",u, ", k_max = ", support_cutoff)
-title!(title)
+xlabel!(L"t")
+titl = string(L"$T \ =$ ", "$T, ", L"\alpha\  =", "$α")
+title!(titl)
 display("image/png", p)
 
-#= 
+
 a = "meanq_3.png";
 savefig(a)
-     =#
+    

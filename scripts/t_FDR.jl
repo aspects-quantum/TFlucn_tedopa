@@ -21,7 +21,7 @@ ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = ρ
 cutoff = 1E-8
 maxdim = 1000
 tau = 10^-2             ## time step duration
-nt = 220
+nt = 350
 ttotal = nt*tau             ## TOTAL TIME evolution
 
 N_chain = 85            ## Number of chain sites for single chain-transformed environment
@@ -41,9 +41,9 @@ zer0[1,1] = 1
 ITensors.op(::OpName"0", ::SiteType"Qudit", d::Int) = zer0
 
 
-ω_C = 3                 ## bath cutoff
-ω_0 = 1                 ## spin splitting
-Ω = 0                   ## independent model if Ω = 0
+ω_C = 5                 ## bath cutoff
+ω_0 = 0                 ## spin splitting
+Ω = 1                   ## independent model if Ω = 0
 
 
 ###
@@ -57,7 +57,7 @@ p=plot()
 
 t_list = collect(0:1:nt)*tau
 T_list = [1, 4, 7, 10]
-α = .1
+α = .01
 
 #cat(a, b) = reshape(append!(vec(a), vec(b)), size(a)[1:end-1]..., :)
 support_cutoff = 7*10^2

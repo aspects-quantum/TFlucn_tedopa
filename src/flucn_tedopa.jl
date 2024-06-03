@@ -15,7 +15,8 @@ export left_vac =#
 #export total_Hamiltonian, chain_Hamiltonian
 
 using Reexport
-@reexport using ITensors, PolyChaos, Plots, LinearAlgebra, QuadGK
+@reexport using ITensors, PolyChaos, Plots, LinearAlgebra, QuadGK, LaTeXStrings
+
 
 include("recur_coeffs.jl")
 #= include("initial_state.jl")
