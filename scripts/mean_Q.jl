@@ -24,11 +24,11 @@ ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = ρ
 ## time evolution parameters
 cutoff = 1E-7
 maxdim = 1000
-tau = 5*10^-3             ## time step duration
-nt = 200
+tau = 7*10^-3             ## time step duration
+nt = 220
 ttotal = nt*tau           ## TOTAL TIME evolution
 
-N_chain = 110             ## Number of chain sites for single chain-transformed environment
+N_chain = 120             ## Number of chain sites for single chain-transformed environment
 tot_chain = 2*N_chain+1 
 
 boson_dim = 10            ## boson excitation cutoff
@@ -47,7 +47,7 @@ ITensors.op(::OpName"0", ::SiteType"Qudit", d::Int) = zer0
 ω_0 = 0                   ## spin splitting
 Ω = 1                     ## independent model if Ω = 0, unbiased model if Ω = 1
 
-T = .1;                   ## temperature of bath
+T = 5;                   ## temperature of bath
 β = 1/T 
 ###
 
@@ -101,6 +101,6 @@ title!(title)
 display("image/png", p)
 
 
-a = "meanq.png";
+a = "meanq_ub.png";
 savefig(a)
     

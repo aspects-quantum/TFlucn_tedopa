@@ -37,7 +37,6 @@ boson_dim = 10
 
 # Make an array of 'site' INDICES for the (spin+chain)
 S_pos = N_chain+1
-
 s_total = [(n == S_pos) ? Index(2, "S=1/2") : Index(boson_dim, "Qudit") for n = 1:tot_chain]
 
     
@@ -48,7 +47,7 @@ ITensors.op(::OpName"0", ::SiteType"Qudit", d::Int) = zer0
 
 ω_C = 5                 ## bath cutoff
 ω_0 = 1                 ## spin splitting
-Ω = 0                     ## independent model if Ω = 0, unbiased model if Ω = 1
+Ω = 0                   ## independent model if Ω = 0, unbiased model if Ω = 1
 
 
 ###
