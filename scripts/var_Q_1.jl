@@ -30,10 +30,10 @@ tau = 10^-2                 ## time step duration
 nt = 150
 ttotal = nt*tau             ## TOTAL TIME evolution
 
-N_chain = 90                ## Number of chain sites for single chain-transformed environment
+N_chain = 100                ## Number of chain sites for single chain-transformed environment
 tot_chain = 2*N_chain+1 
 
-boson_dim = 8
+boson_dim = 10
 
 # Make an array of 'site' INDICES for the (spin+chain)
 S_pos = N_chain+1

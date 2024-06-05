@@ -25,7 +25,7 @@ ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = ρ
 cutoff = 1E-7
 maxdim = 1000
 tau = 5*10^-3             ## time step duration
-nt = 20
+nt = 100
 ttotal = nt*tau           ## TOTAL TIME evolution
 
 N_chain = 110             ## Number of chain sites for single chain-transformed environment
@@ -50,7 +50,7 @@ u = 0.01                                              ## counting field paramete
 
 t_list = collect(0:1:nt)*tau
 #α_list = [0.1,1.5]
-α = 0.1
+α = 1
 
 support_cutoff = 7*10^2
 supp = (0, support_cutoff)                            ## support of the weight function
