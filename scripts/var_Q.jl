@@ -48,7 +48,7 @@ ITensors.op(::OpName"0", ::SiteType"Qudit", d::Int) = zer0
 
 ω_C = 5                 ## bath cutoff
 ω_0 = 1                 ## spin splitting
-Ω = 0                   ## independent model if Ω = 0
+Ω = 0                     ## independent model if Ω = 0, unbiased model if Ω = 1
 
 
 ###

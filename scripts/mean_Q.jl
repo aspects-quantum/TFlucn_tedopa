@@ -25,7 +25,7 @@ ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = ρ
 cutoff = 1E-7
 maxdim = 1000
 tau = 5*10^-3             ## time step duration
-nt = 10
+nt = 200
 ttotal = nt*tau           ## TOTAL TIME evolution
 
 N_chain = 110             ## Number of chain sites for single chain-transformed environment
@@ -44,8 +44,8 @@ ITensors.op(::OpName"0", ::SiteType"Qudit", d::Int) = zer0
 
 
 ω_C = 5                   ## bath cutoff
-ω_0 = 1                   ## spin splitting
-Ω = 0                     ## independent model if Ω = 0
+ω_0 = 0                   ## spin splitting
+Ω = 1                     ## independent model if Ω = 0, unbiased model if Ω = 1
 
 T = .1;                   ## temperature of bath
 β = 1/T 
@@ -55,7 +55,7 @@ u = 0.01                                              ## counting field paramete
 
 t_list = collect(0:1:nt)*tau
 #α_list = [0.1,1.5]
-α = 1
+α = .1
 
 support_cutoff = 7*10^2
 supp = (0, support_cutoff)                            ## support of the weight function
@@ -68,12 +68,6 @@ ab2 = Matrix{Float64}(undef,N_coeff,2)
 n(k) = 1/(exp(β*k) - 1)
 
 p = plot()
-plot!((collect(0:1:length(mean_Q)-1)*tau)[begin:10:end],real(mean_Q)[begin:10:end],label= "α = $α")
-plot!(legend=:topright)
-xlabel!("t")
-title = string("<Q>, N_ch = ", N_chain,", b_dim = ", boson_dim,", u = ",u, ", k_max = ", support_cutoff)
-title!(title)
-display("image/png", p)
 
 #for α = α_list
 
