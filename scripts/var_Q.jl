@@ -105,5 +105,5 @@ title!(title)
 display("image/png", p)
 
 
-a = "varq_2.png";
+a = "varq.png";
 savefig(a)

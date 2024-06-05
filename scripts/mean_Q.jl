@@ -94,6 +94,6 @@ title!(title)
 display("image/png", p)
 
 
-a = "meanq_ub.png";
+a = "meanq.png";
 savefig(a)
     
