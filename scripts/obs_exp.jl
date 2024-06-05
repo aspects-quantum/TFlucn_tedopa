@@ -45,11 +45,6 @@ zer0[1,1] = 1
 ITensors.op(::OpName"0", ::SiteType"Qudit", d::Int) = zer0
 
 
-zer0 = zeros(boson_dim,boson_dim)
-zer0[1,1] = 1
-ITensors.op(::OpName"0", ::SiteType"Qudit", d::Int) = zer0
-
-
 ω_C = 5                 ## bath cutoff
 ω_0 = 0                 ## spin splitting
 Ω = 1                   ## independent model if Ω = 0
