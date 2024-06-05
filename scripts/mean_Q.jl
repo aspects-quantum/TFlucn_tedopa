@@ -44,8 +44,8 @@ ITensors.op(::OpName"0", ::SiteType"Qudit", d::Int) = zer0
 
 
 ω_C = 5                   ## bath cutoff
-ω_0 = 0                   ## spin splitting
-Ω = 1                     ## independent model if Ω = 0, unbiased model if Ω = 1
+ω_0 = 1                   ## spin splitting
+Ω = 0                     ## independent model if Ω = 0, unbiased model if Ω = 1
 
 T = 5;                   ## temperature of bath
 β = 1/T 
@@ -100,7 +100,8 @@ title = string("<Q>, N_ch = ", N_chain,", b_dim = ", boson_dim,", u = ",u, ", k_
 title!(title)
 display("image/png", p)
 
-
-a = "meanq_ub.png";
+#= 
+a = "meanq_.png";
 savefig(a)
     
+ =#

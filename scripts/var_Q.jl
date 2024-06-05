@@ -107,6 +107,7 @@ title = string("<<Q>>, N_ch = ", N_chain,", b_dim = ", boson_dim,", u = ",u, ", 
 title!(title)
 display("image/png", p)
 
-
+#= 
 a = "varq.png";
 savefig(a)
+ =#

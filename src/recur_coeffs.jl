@@ -1,6 +1,3 @@
- #= using PolyChaos
- using Plots
- =#
 
 function recur_coeff(w_fn, supp,N_coeff,Nquad)
     my_meas = Measure("my_meas", w_fn, supp, false, Dict())

@@ -5,14 +5,6 @@ export recur_coeff
 export init_state
 export charfn
 export expectn
-#= export basys
-export SB_char_1
-export SB_char_2
-export partition_fn
-export left_vac =#
-
-
-#export total_Hamiltonian, chain_Hamiltonian
 
 using Reexport
 @reexport using ITensors, PolyChaos, Plots, LinearAlgebra, QuadGK
