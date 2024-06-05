@@ -1,5 +1,5 @@
 ##########################################################################################################
-############# calculate VARIANCE OF HEAT EXCHANGED with the bosonic bath at any time t  ##################
+############# calculate MEAN HEAT EXCHANGED with the bosonic bath at any time t  #########################
 ##########################################################################################################
 
 
@@ -15,49 +15,42 @@ ITensors.disable_warn_order()
 ################# Parameters ########################################################################
 #################            ########################################################################
 
-
-
-ρ = [0 0;0 1]
-ρ = ρ/tr(ρ)
+ρ = [1 0;0 0]    
+ρ = ρ/tr(ρ)             ## initial spin state
 
 ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = ρ
 
 
 ## time evolution parameters
-cutoff = 1E-8
-maxdim = 900
-tau = 10^-2                 ## time step duration
-nt = 150
-ttotal = nt*tau             ## TOTAL TIME evolution
+cutoff = 1E-7
+maxdim = 1000
+tau = 5*10^-3             ## time step duration
+nt = 100
+ttotal = nt*tau           ## TOTAL TIME evolution
 
-N_chain = 100                ## Number of chain sites for single chain-transformed environment
+N_chain = 110             ## Number of chain sites for single chain-transformed environment
 tot_chain = 2*N_chain+1 
 
-boson_dim = 10
+boson_dim = 10            ## boson excitation cutoff
 
 # Make an array of 'site' INDICES for the (spin+chain)
 S_pos = N_chain+1
-
-#s_total = [(n == S_pos_tilde) | (n == S_pos_real) ? Index(2, "S=1/2") : Index(boson_dim, "Qudit") for n = 1:tot_chain]
 s_total = [(n == S_pos) ? Index(2, "S=1/2") : Index(boson_dim, "Qudit") for n = 1:tot_chain]
 
 
-ω_C = 5                 ## bath cutoff
-ω_0 = 1                 ## spin splitting
-Ω = 0                   ## independent model if Ω = 0
+ω_C = 5                   ## bath cutoff
+ω_0 = 0                   ## spin splitting
+Ω = 1                     ## independent model if Ω = 0
 
-
+T = .1;                   ## temperature of bath
+β = 1/T 
 ###
 
-u = 0.001 # counting field parameter
-
-## 
-
-p=plot()
+u = 0.01                                              ## counting field parameter
 
 t_list = collect(0:1:nt)*tau
-T_list = [0.1]
-α = .1
+#α_list = [0.1,1.5]
+α = 1
 
 support_cutoff = 7*10^2
 supp = (0, support_cutoff)                            ## support of the weight function
@@ -67,12 +60,12 @@ N_coeff = N_chain + 1
 ab1 = Matrix{Float64}(undef,N_coeff,2)
 ab2 = Matrix{Float64}(undef,N_coeff,2)
 
+n(k) = 1/(exp(β*k) - 1)
 
-for T = T_list
-    β = 1/T 
-    n(k) = 1/(exp(β*k) - 1)
-    w_fn1(k) = (2*α*k*exp(-k/ω_C))*(1 + n(k))              ## weight function for real space bath
-    w_fn2(k) = (2*α*k*exp(-k/ω_C))*n(k)                    ## weight function for tilde space bath
+#for α = α_list
+
+    w_fn1(k) = (2*α*k*exp(-k/ω_C))*(1 + n(k))         ## weight function for real space bath
+    w_fn2(k) = (2*α*k*exp(-k/ω_C))*n(k)               ## weight function for tilde space bath
     η01 = quadgk(w_fn1, 0, support_cutoff)
     c_01 = sqrt(η01[1])
     η02 = quadgk(w_fn2, 0, support_cutoff)
@@ -85,25 +78,22 @@ for T = T_list
         [ab2[i,1] = a2_100  for i = 91:N_coeff]; [ab2[i,2] = b2_100  for i = 91:N_coeff]; 
     end
 
-
-    chi_2pu = charfn(ω_0, Ω, c_01, c_02, ab1, ab2, s_total, tau, nt, 2*u, cutoff, maxdim)
     chi_pu = charfn(ω_0, Ω, c_01, c_02, ab1, ab2, s_total, tau, nt, u, cutoff, maxdim)
 
-    var_Q = -(log.(chi_2pu)-2*log.(chi_pu))/(u^2)
+    mean_Q = imag.(chi_pu)/u
+    @show real(mean_Q)
 
-    plot!(t_list,real(var_Q),label= "T = $T, α = 0.1")
-    @show var_Q
-
-end
-
+    plot!((collect(0:1:length(mean_Q)-1)*tau)[begin:10:end],real(mean_Q)[begin:10:end],label= "α = $α")
+#end
 
 
 plot!(legend=:topright)
 xlabel!("t")
-title = string("<<Q>>, N_ch = ", N_chain,", b_dim = ", boson_dim,", u = ",u, ", k_max = ", support_cutoff)
+title = string("<Q>, N_ch = ", N_chain,", b_dim = ", boson_dim,", u = ",u, ", k_max = ", support_cutoff)
 title!(title)
 display("image/png", p)
 
 
-a = "varq_2.png";
+a = "meanq_ub.png";
 savefig(a)
+    

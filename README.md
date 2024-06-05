@@ -2,7 +2,7 @@
 
 This is a package[^SBmodel] for calculating FLUCTUATIONS of heat transfer in the Spin-Boson model[^PRX2020] using the **Time Evolving Density matrices using Orthogonal Polynomial Algorithm (_TEDOPA_)**[^Prior2010][^Chin2010]. 
 
-We employ the **Thermofield-based chain-mapping approach for open quantum systems** approach[^PRA2015] that enables us to use a vacuum initial matrix product state (pure) for the environment instead of a thermal state (mixed), thereby speeding up the computation greatly.
+We employ the **Thermofield-based chain-mapping approach for open quantum systems**[^PRA2015] that enables us to use a vacuum initial matrix product state (pure) for the environment instead of a thermal state (mixed), thereby speeding up the computation greatly.
 
 In this package, we use the ITensor library[^Itensor] in Julia for tensor network manipulations.
 
@@ -27,7 +27,7 @@ In this package, we use the ITensor library[^Itensor] in Julia for tensor networ
 **************************************************************************
 [^SBmodel]: This code base is using the [Julia Language](https://julialang.org/) and 
 [DrWatson](https://juliadynamics.github.io/DrWatson.jl/stable/) to make 
-a reproducible scientific project named SBmodel
+a reproducible scientific project named **flucn_tedopa**
 
 
 [^PRX2020]: Popovic, Maria, Mark T. Mitchison, Aidan Strathearn, Brendon W. Lovett, John Goold, and Paul R. Eastham. "Quantum heat statistics with time-evolving matrix product operators." PRX Quantum 2, no. 2 (2021): 020338.
