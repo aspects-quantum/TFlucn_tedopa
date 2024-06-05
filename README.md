@@ -1,8 +1,8 @@
 ## Heat fluctuations using TEDOPA 
 
-This is a package[^SBmodel] for calculating moments of heat transfer in the Spin-Boson model[^PRX2020] using the **Time Evolving Density matrices using Orthogonal Polynomial Algorithm (_TEDOPA_)**[^Prior2010][^Chin2010]. 
+This is a package[^SBmodel] for calculating FLUCTUATIONS of heat transfer in the Spin-Boson model[^PRX2020] using the **Time Evolving Density matrices using Orthogonal Polynomial Algorithm (_TEDOPA_)**[^Prior2010][^Chin2010]. 
 
-We also employ the **Temperature-dependent spectral density (_T-SD_)** approach[^PRL2019] that enables us to use a vacuum initial matrix product state (pure) for the environment instead of a thermal state (mixed), thereby speeding up the computation greatly.
+We employ the **Thermofield-based chain-mapping approach for open quantum systems** approach[^PRA2015] that enables us to use a vacuum initial matrix product state (pure) for the environment instead of a thermal state (mixed), thereby speeding up the computation greatly.
 
 In this package, we use the ITensor library[^Itensor] in Julia for tensor network manipulations.
 
@@ -11,13 +11,13 @@ In this package, we use the ITensor library[^Itensor] in Julia for tensor networ
 
 ***PLEASE NOTE THE FOLLOWING POINTS before running these codes on Julia:***
 
-> The scripts **scripts\heat_flucn.jl** and **scripts\heat_flcn_1.jl** define all the parameters of the model.
+> The **scripts** files define all the parameters of the model: **scripts\mean_Q.jl** (computes mean heat exchange), **scripts\var_Q.jl** (computes variance of heat exchange), **scripts\obs_exp.jl** (computes expected value of any observable).
 
-> The heat characteristic function is calculated in the files **src\char.jl** & **src\char_1.jl**.
+> Hamiltonians and Gates are defined in the file **src\ham_gates.jl**.
 
-> Initial state of the (system+environment) is defined in the file **src\initial_state.jl**.
+> Initial state of the (system+environment) is defined in the file **src\init_state.jl**.
 
-> Hamiltonians and Gates are defined in the file **src\Hamiltonians.jl**.
+> The heat characteristic function[^RMP2009] is calculated in the file **src\charfn.jl**.
 
 
 
@@ -36,8 +36,9 @@ a reproducible scientific project named SBmodel
 
 [^Chin2010]: Chin, Alex W., Ángel Rivas, Susana F. Huelga, and Martin B. Plenio. "Exact mapping between system-reservoir quantum models and semi-infinite discrete chains using orthogonal polynomials." Journal of Mathematical Physics 51, no. 9 (2010): 092109.
 
+[^PRA2015]: de Vega, Inés, and Mari-Carmen Banuls. "Thermofield-based chain-mapping approach for open quantum systems." Physical Review A 92, no. 5 (2015): 052116.
 
-[^PRL2019]: Tamascelli, Dario, Andrea Smirne, James Lim, Susana F. Huelga, and Martin B. Plenio. "Efficient simulation of finite-temperature open quantum systems." Physical Review Letters 123, no. 9 (2019): 090402.
+[^RMP2009]: Esposito, Massimiliano, Upendra Harbola, and Shaul Mukamel. "Nonequilibrium fluctuations, fluctuation theorems, and counting statistics in quantum systems." Reviews of modern physics 81, no. 4 (2009): 1665.
 
 [^Itensor]: https://itensor.github.io/ITensors.jl/dev/index.html
 
