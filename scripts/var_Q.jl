@@ -38,8 +38,12 @@ boson_dim = 10
 # Make an array of 'site' INDICES for the (spin+chain)
 S_pos = N_chain+1
 
-#s_total = [(n == S_pos_tilde) | (n == S_pos_real) ? Index(2, "S=1/2") : Index(boson_dim, "Qudit") for n = 1:tot_chain]
 s_total = [(n == S_pos) ? Index(2, "S=1/2") : Index(boson_dim, "Qudit") for n = 1:tot_chain]
+
+    
+zer0 = zeros(boson_dim,boson_dim)
+zer0[1,1] = 1
+ITensors.op(::OpName"0", ::SiteType"Qudit", d::Int) = zer0
 
 
 ω_C = 5                 ## bath cutoff
@@ -91,7 +95,7 @@ for T = T_list
 
     var_Q = -(log.(chi_2pu)-2*log.(chi_pu))/(u^2)
 
-    plot!(t_list,real(var_Q),label= "T = $T, α = 0.1")
+    plot!(t_list,real(var_Q),label= "T = $T, α = $α")
     @show var_Q
 
 end
