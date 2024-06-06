@@ -25,12 +25,12 @@ ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = ρ
 
 ## time evolution parameters
 cutoff = 1E-8
-maxdim = 900
-tau = 10^-2                 ## time step duration
-nt = 150
+maxdim = 1000
+tau = 9*10^-3                 ## time step duration
+nt = 200
 ttotal = nt*tau             ## TOTAL TIME evolution
 
-N_chain = 100                ## Number of chain sites for single chain-transformed environment
+N_chain = 120                ## Number of chain sites for single chain-transformed environment
 tot_chain = 2*N_chain+1 
 
 boson_dim = 10
@@ -52,7 +52,7 @@ ITensors.op(::OpName"0", ::SiteType"Qudit", d::Int) = zer0
 
 ###
 
-u = 0.001 # counting field parameter
+u = 0.005 # counting field parameter
 
 ## 
 
@@ -62,7 +62,7 @@ t_list = collect(0:1:nt)*tau
 T_list = [0.1]
 α = .1
 
-support_cutoff = 7*10^2
+support_cutoff = 10^3
 supp = (0, support_cutoff)                            ## support of the weight function
 Nquad = 10^7                                          ## Number of quadrature points
 N_coeff = N_chain + 1

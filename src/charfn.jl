@@ -26,7 +26,7 @@ function charfn(ω_0, Ω, c_01, c_02, ab1, ab2, s_total, tau, nt, u, cutoff, max
         U_ρ_Ud = apply(evol, U_ρ_Ud; cutoff, maxdim, apply_dag=true)
         cd_U_ρ_Ud = apply(count_dates, U_ρ_Ud; cutoff, maxdim)
 
-        chi = tr(cd_U_ρ_Ud)
+        @show chi = tr(cd_U_ρ_Ud)
         
         push!(char_fn,chi[1])
 

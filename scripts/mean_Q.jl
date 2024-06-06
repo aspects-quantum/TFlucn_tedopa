@@ -22,10 +22,10 @@ ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = ρ
 
 
 ## time evolution parameters
-cutoff = 1E-7
+cutoff = 1E-8
 maxdim = 1000
-tau = 7*10^-3             ## time step duration
-nt = 220
+tau = 5*10^-3             ## time step duration
+nt = 200
 ttotal = nt*tau           ## TOTAL TIME evolution
 
 N_chain = 120             ## Number of chain sites for single chain-transformed environment
@@ -47,7 +47,7 @@ ITensors.op(::OpName"0", ::SiteType"Qudit", d::Int) = zer0
 ω_0 = 1                   ## spin splitting
 Ω = 0                     ## independent model if Ω = 0, unbiased model if Ω = 1
 
-T = 5;                   ## temperature of bath
+T = .1;                   ## temperature of bath
 β = 1/T 
 ###
 
@@ -55,9 +55,9 @@ u = 0.01                                              ## counting field paramete
 
 t_list = collect(0:1:nt)*tau
 #α_list = [0.1,1.5]
-α = .1
+α = .2
 
-support_cutoff = 7*10^2
+support_cutoff = 10^3
 supp = (0, support_cutoff)                            ## support of the weight function
 Nquad = 10^7                                          ## Number of quadrature points
 N_coeff = N_chain + 1
@@ -70,7 +70,6 @@ n(k) = 1/(exp(β*k) - 1)
 p = plot()
 
 #for α = α_list
-
     w_fn1(k) = (2*α*k*exp(-k/ω_C))*(1 + n(k))         ## weight function for real space bath
     w_fn2(k) = (2*α*k*exp(-k/ω_C))*n(k)               ## weight function for tilde space bath
     η01 = quadgk(w_fn1, 0, support_cutoff)
@@ -90,7 +89,8 @@ p = plot()
     mean_Q = imag.(chi_pu)/u
     @show real(mean_Q)
 
-    plot!((collect(0:1:length(mean_Q)-1)*tau)[begin:10:end],real(mean_Q)[begin:10:end],label= "α = $α")
+    #plot!((collect(0:1:length(mean_Q)-1)*tau)[begin:5:end],real(mean_Q)[begin:5:end],label= "α = $α")
+    plot!((collect(0:1:length(mean_Q)-1)*tau),real(mean_Q),label= "α = $α")
 #end
 
 
