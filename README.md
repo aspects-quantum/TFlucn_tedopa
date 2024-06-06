@@ -5,7 +5,10 @@ This is a package[^SBmodel] for calculating FLUCTUATIONS of heat transfer in the
 We employ the **Thermofield-based chain-mapping approach for open quantum systems**[^PRA2015] that enables us to use a vacuum initial matrix product state (pure) for the environment instead of a thermal state (mixed), thereby speeding up the computation greatly.
 
 In this package, we use the ITensor library[^Itensor] in Julia for tensor network manipulations.
+&nbsp;
+&NewLine;
 
+This package uses **julia = "1.8.2"** version.
 
 &nbsp;
 
@@ -18,8 +21,6 @@ In this package, we use the ITensor library[^Itensor] in Julia for tensor networ
 > Initial state of the (system+environment) is defined in the file **src\init_state.jl**.
 
 > The heat characteristic function[^RMP2009] is calculated in the file **src\charfn.jl**.
-
-
 
 &nbsp;
 &NewLine;
