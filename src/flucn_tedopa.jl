@@ -1,37 +1,21 @@
 module flucn_tedopa
 
-export exp_xHB,unit_gates
-export recur_coeff
-export init_state
-export charfn
-export expectn
-#= export basys
-export SB_char_1
-export SB_char_2
-export partition_fn
-export left_vac =#
+export write_for_loop, write_to_file ##include("textfiles.jl")
+export recur_coeff ##include("recur_coeffs.jl")
+export HBB_tf, HTOT_tf, exp_xHB_tdvp #include("v_ham_TDVP.jl") #  exp_xHB_tf, unit_gates_tf
+export exp_xHB_comp, tot_gate ###include("v_ham_TEBD.jl")
 
-
-#export total_Hamiltonian, chain_Hamiltonian
 
 using Reexport
-@reexport using ITensors, PolyChaos, Plots, LinearAlgebra, QuadGK, LaTeXStrings
+@reexport using ITensors, ITensorMPS, PolyChaos, Plots, LinearAlgebra, QuadGK, LaTeXStrings, HDF5, Dates
 
-
+include("textfiles.jl")
 include("recur_coeffs.jl")
-#= include("initial_state.jl")
-include("basys.jl")
-include("SB_char_1.jl")
-include("SB_char_2.jl")
-include("Hamiltonians.jl")
-include("partition_fn.jl")
-include("left_vac.jl") =#
-include("t_ham_gates.jl")
-include("t_charfn.jl")
-include("t_init_state.jl")
-include("t_exp_obs.jl")
-
-
+include("v_ham_gates.jl")
+include("v_charfn.jl")
+include("v_thermal_MPS.jl")
+include("v_ham_TDVP.jl")
+include("v_ham_TEBD.jl")
 
 
 end
