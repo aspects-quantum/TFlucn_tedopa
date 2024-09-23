@@ -9,42 +9,32 @@ ITensors.disable_warn_order()
 ################# Parameters ########################################################################
 #################            ########################################################################
 
-
 file_name_txt = string(split(split(@__FILE__, ".")[end-1], string(\))[end],".txt")
 file_name_png = string(split(split(@__FILE__, ".")[end-1], string(\))[end],".png")
-
 
 ρ = [1 0;0 0]    
 ρ = ρ/tr(ρ)             ## initial spin state
 
 ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = ρ
 
-cut = -7
+
+
+cut = -6
 cutoff = 10.0^cut
 #maxdim_ops = 5
-maxdim = 200
+maxdim = 10
 tau = 10^-2             ## time step duration
-nt = 50
-Nbeta = 80
+nt = 3
+Nbeta = 15
 ttotal = nt * tau           ## TOTAL TIME evolution
 
-N_chain = 20            ## Number of chain sites for single chain-transformed environment
-tot_chain = 2*N_chain+2
+N_chain = 15            ## Number of chain sites for single chain-transformed environment
 
-
-# Make an array of 'site' INDICES for the (spin+chain)
-S_pos_t = N_chain+1
-S_pos_r = N_chain+2
-
-println(S_pos_r)
-
-n1_bsn_dim = 5;
+n1_bsn_dim = 4;
 b_dim = [n1_bsn_dim-round(Int64,(n1_bsn_dim-2.6)*(i-1)/(N_chain-1)) for i = 1:N_chain]           ## Dimension of chain sites
-boson_dim = append!(reverse(b_dim),[0 0],b_dim)
+boson_dim = append!([0],b_dim)
 
-
-s_total = [(n == S_pos_t) | (n == S_pos_r) ? Index(2, "S=1/2") : Index(boson_dim[n], "Qudit") for n = 1:tot_chain]
-s_tot_comp = s_total[S_pos_r:tot_chain]# [(n == 1) ? Index(2, "S=1/2") : Index(boson_dim[S_pos_t + n], "Qudit") for n = 1:S_pos_t]
+s_tot_comp = [(n == 1) ? Index(2, "S=1/2") : Index(boson_dim[n], "Qudit") for n = 1:N_chain] 
 
 ITensors.op(::OpName"Idd", ::SiteType"Qudit", d::Int) = (1 / d) * Matrix(1.0I, d, d)
 ITensors.op(::OpName"Idd", ::SiteType"S=1/2") = (1 / 2) * Matrix(1.0I, 2, 2)
@@ -59,12 +49,12 @@ if ω_0 == 1
 else
     model = "unbiased"
 end
-
 T = 1;                  ## temperature of bath
 β = 1/T 
 ###
 
 u = 0.01 # counting field parameter
+
 
 ## 
 
@@ -96,15 +86,13 @@ else
 end
 
 
-I0 = MPO(s_tot_comp, "Id")
+
+I0 = MPO(s_tot_comp, "Idd")
 ρ_vec = convert(MPS, I0)
-for i = 1:Int(length(s_tot_comp))
-    ρ_vec[i] = ρ_vec[i]*delta(s_tot_comp[i]', s_total[S_pos_t+1-i])
-end
 normalize!(ρ_vec)
 
 for i = 1:Nbeta           ## perform IMAGINARY TIME evolution
-    global ρ_vec = apply(exp_xHB_comp(ab, -0.5*β/Nbeta, s_total), ρ_vec; cutoff, maxdim)
+    global ρ_vec = apply(exp_xHB_comp(ab, -0.5*β/Nbeta, s_tot_comp), ρ_vec; cutoff, maxdim)
     normalize!(ρ_vec)
     println("thermal state", i)
 end
@@ -112,9 +100,9 @@ end
 @show ρ_vec 
 
 
-count_gates_1 = exp_xHB_comp(ab, -im*u, s_total)
-count_gates_2 = exp_xHB_comp(ab, im*u, s_total)
-evol = tot_gate(ω_0, Ω, c_0, ab, tau, s_total)
+count_gates_1 = exp_xHB_comp(ab, -im*u, s_tot_comp)
+count_gates_2 = exp_xHB_comp(ab, -im*2*u, s_tot_comp)
+evol = tot_gate(ω_0, Ω, c_0, ab, tau, s_tot_comp)
 
 char_fn_1=Vector{ComplexF64}()
 char_fn_2=Vector{ComplexF64}()
@@ -129,12 +117,10 @@ cg_U_ρ_2 = cg_ρ_2
 
 chi_1 = inner(cg_U_ρ_1, U_cg_ρ_1)
 chi_2 = inner(cg_U_ρ_2, U_cg_ρ_2)
-
-#println(real(-(log.(chi_2[1])-2*log.(chi_1[1]))/(u^2)))
-println(real(-(log.(chi_2[1])+log.(chi_1[1]))/(u^2)))
+println(chi_1[1])
+println(chi_2[1])
 push!(char_fn_1,chi_1[1])
 push!(char_fn_2,chi_2[1])
-
 
 write_for_loop(file_name_txt, string(1), "Indep boson: T = $T, alpha = $α, N_chain = $N_chain, maxdim = $maxdim, cutoff = $cut, tau = $tau")
 for t in 1:nt
@@ -144,39 +130,34 @@ for t in 1:nt
     global U_cg_ρ_2 = apply(evol, U_cg_ρ_2; cutoff, maxdim)
     global U_ρ = apply(evol, U_ρ; cutoff, maxdim)
     global cg_U_ρ_2 = apply(count_gates_2, U_ρ; cutoff, maxdim)
+
     chi_1 = inner(cg_U_ρ_1, U_cg_ρ_1)
     chi_2 = inner(cg_U_ρ_2, U_cg_ρ_2)
-    #println(real(-(log.(chi_2[1])-2*log.(chi_1[1]))/(u^2)))
-    println(real(-(log.(chi_2[1])+log.(chi_1[1]))/(u^2)))
+    println(chi_1[1])
+    println(chi_2[1])
     push!(char_fn_1,chi_1[1])
     push!(char_fn_2,chi_2[1])
-    write_for_loop(file_name_txt, string(t+1), string(real(-(log.(chi_2[1])+log.(chi_1[1]))/(u^2))))
+    write_for_loop(file_name_txt, string(t), string([imag.(chi_1[1])/u, imag.(chi_2[1])/u]))
 end
 chi_pu = char_fn_1
 chi_2pu = char_fn_2
 
-#var_Q = -(log.(chi_2pu)-2*log.(chi_pu))/(u^2)
-var_Q = -(log.(chi_2[1])+log.(chi_1[1]))/(u^2)
+var_Q = -(log.(chi_2pu)-2*log.(chi_pu))/(u^2)
 @show real(var_Q)
+write_to_file(file_name_txt, string(model, " boson: T = $T, alpha = $α, N_chain = $N_chain, maxdim = $maxdim, tau = $tau"), string(real(var_Q)))
 
 #plot!(t_list,real(mean_Q),label= "α = $α")
-#= 
-plot!((collect(0:1:length(mean_Q)-1)*tau),real(mean_Q),label= "α = $α")
+
+plot!((collect(0:1:length(mean_Q)-1)*tau),real(var_Q),label= "α = $α")
 #end
 
 
 plot!(legend=:topright)
-xlabel!("t")
-title = string("<Q>, N_ch = ", N_chain,", b_dim = ", boson_dim,", u = ",u, ", k_max = ", support_cutoff)
+xlabel!("t")  
+title = string(L"\langle Q^2 \rangle, N_{ch} = %$(N_chain), \delta\beta = \frac{\beta}{%$Nbeta}, \mathrm{cutoff} = 10^{%$(cut)}, χ = %$maxdim")
 title!(title)
 display("image/png", p)
 
 
-a = "tebd_ind_T5_ao2_ho01.png";
-savefig(a)
-    =#
-#= 
-using HDF5
-f = h5open("myfile.h5","r")
-T = read(f,"thermal_state",MPS)
-close(f) =#
+a = file_name_png;
+safesave(a,p)
