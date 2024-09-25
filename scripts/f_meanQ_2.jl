@@ -12,35 +12,32 @@ ITensors.disable_warn_order()
 file_name_txt = string(split(split(@__FILE__, ".")[end-1], string(\))[end],".txt")
 file_name_png = string(split(split(@__FILE__, ".")[end-1], string(\))[end],".png")
 
-ρ = [1 0;0 0]    
-ρ = ρ/tr(ρ)             ## initial spin state
+ρ0 = [1 0;0 0]    
+ρ0 = ρ0/tr(ρ0)             ## initial spin state
 
-ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = ρ
+ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = ρ0
 
 
 
-cut = -9
+cut = -8
 cutoff = 10.0^cut
 #maxdim_ops = 5
 maxdim = 1000
-tau = 2*10^-3             ## time step duration
-nt = 500
+tau = 5*10^-3             ## time step duration
+nt = 1000
 ttotal = nt * tau           ## TOTAL TIME evolution
 
-N_chain = 100           ## Number of chain sites for single chain-transformed environment
-tot_chain = 2*N_chain+2
-S_pos_t = N_chain+1
-S_pos_r = N_chain+2
+N_chain = 150           ## Number of chain sites for single chain-transformed environment
+tot_chain = 2*N_chain+1
+S_pos = N_chain+1
 
-println(S_pos_r)
+println(S_pos)
 
-n1_bsn_dim = 9;
+n1_bsn_dim = 8;
 b_dim = [n1_bsn_dim-round(Int64,(n1_bsn_dim-2.6)*(i-1)/(N_chain-1))  for i = 1:N_chain]   #       ## Dimension of chain sites
-boson_dim = append!(reverse(b_dim),[0 0],b_dim)
+boson_dim = append!(reverse(b_dim),[0],b_dim)
 
-s_total = [(n == S_pos_t) | (n == S_pos_r) ? Index(2, "S=1/2") : Index(boson_dim[n], "Qudit") for n = 1:tot_chain]
-s_tot_comp = s_total[S_pos_r:tot_chain]# [(n == 1) ? Index(2, "S=1/2") : Index(boson_dim[S_pos_t + n], "Qudit") for n = 1:S_pos_t]
-
+s_total = [(n == S_pos) ? Index(2, "S=1/2") : Index(boson_dim[n], "Qudit") for n = 1:tot_chain]
 
 ITensors.op(::OpName"0", ::SiteType"Qudit", d::Int) = 1.0I[1:d,1]*1.0I[1:d,1]'
 ITensors.op(::OpName"Idd", ::SiteType"Qudit", d::Int) = (1 / d) * Matrix(1.0I, d, d)
@@ -59,7 +56,7 @@ u = 0.01 # counting field parameter
 
 t_list = collect(0:1:nt)*tau
 #α_list = [0.1,1.5]
-α = .1
+α = .2
 
 #cat(a, b) = reshape(append!(vec(a), vec(b)), size(a)[1:end-1]..., :)
 support_cutoff = 7*10^3
@@ -74,7 +71,7 @@ n(ω) = 1/(exp(β*ω) - 1)
 
 #for α = α_list
 
-w_fn1(k) = (2*α*k*exp(-k/ω_C))*(1 + n(k))         ## weight function for real space bath
+w_fn1(k) = (2*α*k*exp(-k/ω_C))*(1 + n(k))            ## weight function for real space bath
 w_fn2(k) = (2*α*k*exp(-k/ω_C))*(n(k))                ## weight function for tilde space bath
 η01 = quadgk(w_fn1, 0, support_cutoff)
 c_01 = sqrt(η01[1])
@@ -92,33 +89,27 @@ else
     ab2 = recur_coeff(w_fn2, supp, N_coeff, Nquad) 
 end
 
-state = [(n == S_pos_r) ? "ρ" : "0" for n = S_pos_r:tot_chain]
-RHO_0 = MPO(s_tot_comp,state)
-ρ_vec = convert(MPS, RHO_0)
-for i = 1:Int(length(s_tot_comp))
-    ρ_vec[i] = ρ_vec[i]*delta(s_tot_comp[i]', s_total[S_pos_t+1-i])
-end
-#normalize!(ρ_vec)
-#@show ρ_vec 
-
+state = [(n == S_pos) ? "ρ" : "0" for n = 1:tot_chain]
+ρ = MPO(s_total,state)
 
 count_gates = exp_xHB_comp(ab1, ab2, im*u, s_total)
 evol = tot_gate(ω_0, Ω, c_01, c_02, ab1, ab2, tau, s_total)
 
 char_fn=Vector{ComplexF64}()
 
-U_ρ = ρ_vec
-cg_U_ρ = apply(count_gates, ρ_vec; cutoff, maxdim)
+U_ρ_Ud = ρ
+cd_U_ρ_Ud = apply(count_gates, U_ρ_Ud; cutoff, maxdim)
 
-chi = inner(U_ρ, cg_U_ρ)
+chi = tr(cd_U_ρ_Ud)
 println(imag.(chi[1])/u)
 push!(char_fn,chi[1])
 write_for_loop(file_name_txt, string(1), "Independent boson: T = $T, alpha = $α, N_chain = $N_chain, maxdim = $maxdim, cutoff = $cut, tau = $tau")
-for t in 1:nt
-    global U_ρ = apply(evol, U_ρ; cutoff, maxdim)
-    global cg_U_ρ = apply(count_gates, U_ρ; cutoff, maxdim)
 
-    chi = inner(U_ρ, cg_U_ρ)
+for t in 1:nt
+    global U_ρ_Ud = apply(evol, U_ρ_Ud; cutoff, maxdim, apply_dag=true)
+    global cd_U_ρ_Ud = apply(count_gates, U_ρ_Ud; cutoff, maxdim)
+
+    chi = tr(cd_U_ρ_Ud)
     println(imag.(chi[1])/u)
     write_for_loop(file_name_txt, string(t+1), string(imag.(chi[1])/u))
     push!(char_fn,chi[1])
@@ -130,7 +121,7 @@ mean_Q = imag.(chi_pu)/u
 write_to_file(file_name_txt, "Independent boson: T = $T, alpha = $α, N_chain = $N_chain, maxdim = $maxdim, cutoff = $cut, tau = $tau", string(real(mean_Q)))
 
 p = plot()
-plot!((collect(0:1:length(mean_Q)-1)*tau),real(mean_Q),label= "α = $α")
+plot!((collect(0:1:length(mean_Q)-1)*tau)[begin:10:end],real(mean_Q)[begin:10:end],label= "α = $α")
 #end
 
 

@@ -18,5 +18,6 @@ include("recur_coeffs.jl")
 #include("v_ham_TDVP.jl")
 #include("v_ham_TEBD.jl")
 
-include("f_ham.jl")
+#include("f_ham.jl")
+include("f_ham_mpo.jl")
 end

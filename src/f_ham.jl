@@ -50,14 +50,14 @@ function tot_gate(ω_0, Ω, c_01, c_02, ab1, ab2, tau, s_total)
         s2p = s_total[N_ch-j]
 
         if j == 1
-            hj = ω_0 * op("Sz", s1) * op("Id", s2)  +
+            hj = ω_0 * op("Sz", s1) * op("Id", s2) +
                  Ω * op("Sx", s1) * op("Id", s2)   +
                  c_01 * op("Sz", s1) * op("A", s2) +
                  c_01 * op("Sz", s1) * op("Adag", s2)
-                 -ω_0 * op("Sz", s1p) * op("Id", s2p)  
-                 -Ω * op("Sx", s1p) * op("Id", s2p)   
-                 c_02 * op("Sz", s1p) * op("A", s2p) 
-                 c_02 * op("Sz", s1p) * op("Adag", s2p)
+                 #= -ω_0 * op("Sz", s1p) * op("Id", s2p)  
+                 -Ω * op("Sx", s1p) * op("Id", s2p)    =#
+                 c_02 * op("Sz", s1) * op("A", s2p) 
+                 c_02 * op("Sz", s1) * op("Adag", s2p)
         else
             ω_n1 = ab1[i-1, 1]
             t_n1 = sqrt(ab1[i, 2])
@@ -66,9 +66,9 @@ function tot_gate(ω_0, Ω, c_01, c_02, ab1, ab2, tau, s_total)
             hj = ω_n1 * op("N", s1) * op("Id", s2)  +
                  t_n1 * op("Adag", s1) * op("A", s2) +
                  t_n1 * op("A", s1) * op("Adag", s2)
-               - ω_n2 * op("N", s1p) * op("Id", s2p) 
-               - t_n2 * op("Adag", s1p) * op("A", s2p) 
-               - t_n2 * op("A", s1p) * op("Adag", s2p)
+                -ω_n2 * op("N", s1p) * op("Id", s2p) 
+                -t_n2 * op("Adag", s1p) * op("A", s2p) 
+                -t_n2 * op("A", s1p) * op("Adag", s2p)
         end
 
         Gj = exp(-im * (tau / 2) * hj)
