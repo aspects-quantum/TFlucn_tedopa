@@ -8,8 +8,6 @@ In this package, we use the ITensor library[^Itensor] in Julia for tensor networ
 &nbsp;
 &NewLine;
 
-This package uses **julia = "1.8.2"** version.
-
 &nbsp;
 
 ***PLEASE NOTE THE FOLLOWING POINTS before running these codes on Julia:***
