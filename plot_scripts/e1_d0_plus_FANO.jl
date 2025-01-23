@@ -253,11 +253,11 @@ ytick_labels1 = [string(round(y, digits = 1)) for y in yticks1]
 ytick_labels2 = [string(round(y, digits = 1)) for y in yticks2]
 
 
-p1 = plot(time_steps, mQ1./vQ1, xaxis = L"t", yaxis = L"\frac{\langle\langle Q^2 \rangle\rangle}{\langle Q \rangle}", 
-xtickfont = font(12), ytickfont = font(12), xticks = (xticks, xtick_labels),# yticks = (yticks1, ytick_labels1), 
-xguidefontsize=18,yguidefontsize=20, color = :orange,
-seriesalpha = 0.9, linewidth = 6, label = L"\ \alpha = 0.5")
-plot!(time_steps, mQ2./vQ2, color = :brown,seriesalpha = 0.9, linewidth = 6, label = L"\ \alpha = 1.5")
+p1 = curves(time_steps, mQ1./vQ1, xaxis = L"t", yaxis = L"F", #yaxis = L"\frac{\langle\langle Q^2 \rangle\rangle}{\langle Q \rangle}", 
+xtickfont = font(15), ytickfont = font(15), xticks = (xticks, xtick_labels),
+xguidefontsize=22,yguidefontsize=25, color = :orange,
+seriesalpha = 0.9, linewidth = 10, label = L"\ \alpha = 0.5")
+plot!(time_steps, mQ2./vQ2, color = :brown,seriesalpha = 0.9, linewidth = 10, label = L"\ \alpha = 1.5")
 
 plot!(widen = false)
 vline!([xlims(p1)[2]], lc = :black, lw = 2, label = false)
@@ -265,10 +265,11 @@ hline!([ylims(p1)[2]], lc = :black, lw = 2, label = false)
 #plot!(legend = :outertopright)
 
 title!(L"\epsilon = 1, \Delta = 0, T = 0.01")
+plot!(titlefontsize = 20)
 
 #ticks_length!(tl=.04)
 
 # Customize plot appearance, place legend inside
-plot!(legend = :right, grid = false, legendfontsize = 16)
+plot!(legend = :right, grid = false, legendfontsize = 20)
 
 display("image/png", p1)

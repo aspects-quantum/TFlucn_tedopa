@@ -105,8 +105,7 @@ end
 
 
 # Method definitions must be at the top level, not inside functions
-ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = [1 0; 0 0]  # Adjusted normalization of the spin state
-
+ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = [1.0 0.0;0.0 0.0]  # Adjusted normalization of the spin state
 ITensors.op(::OpName"0", ::SiteType"Qudit", d::Int) = 1.0I[1:d, 1] * 1.0I[1:d, 1]'
 ITensors.op(::OpName"Idd", ::SiteType"Qudit", d::Int) = (1 / d) * Matrix(1.0I, d, d)
 ITensors.op(::OpName"Idd", ::SiteType"S=1/2") = (1 / 2) * Matrix(1.0I, 2, 2)
@@ -120,11 +119,11 @@ let
         @show file_name_txt_v
 
         # Define parameters for simulation
-        cut = -12
+        cut = -12  # Cutoff for singular values
         cutoff = 10.0^cut
         maxdim = 80
         tau = 0.002  # Time step duration
-        nt = 1000
+        nt = 1000  # Number of time steps
         ttotal = nt * tau  # Total time evolution
 
         N_chain = 160  # Number of chain sites for a single chain-transformed environment
@@ -154,13 +153,14 @@ let
         β = 1 / T
 
         t_list = collect(0:1:nt) * tau
-        α = 1.5
+        α = 0.1
         mean_Q = Float64[]
 
         support_cutoff = 700
         supp = (0, support_cutoff)  # Support of the weight function
         Nquad = 10^7  # Reduced number of quadrature points for speed
         N_coeff = N_chain + 1
+        N_rec = 78
         ab1 = Matrix{Float64}(undef, N_coeff, 2)
         ab2 = Matrix{Float64}(undef, N_coeff, 2)
 
@@ -175,13 +175,13 @@ let
         η02 = quadgk(w_fn2, 0, support_cutoff)
         c_02 = sqrt(Complex(η02[1]))
 
-        if N_chain >= 92
-                ab1[1:92, 1:2] = recur_coeff(w_fn1, supp, 92, Nquad)
-                ab2[1:92, 1:2] = recur_coeff(w_fn2, supp, 92, Nquad)
-                a1_100, b1_100 = ab1[92, 1], ab1[92, 2]
-                a2_100, b2_100 = ab2[92, 1], ab2[92, 2]
-                ab1[93:N_coeff, 1:2] .= repeat([a1_100 b1_100], N_coeff - 92, 1)
-                ab2[93:N_coeff, 1:2] .= repeat([a2_100 b2_100], N_coeff - 92, 1)
+        if N_chain >= N_rec
+                ab1[1:N_rec, 1:2] = recur_coeff(w_fn1, supp, N_rec, Nquad)
+                ab2[1:N_rec, 1:2] = recur_coeff(w_fn2, supp, N_rec, Nquad)
+                a1_100, b1_100 = ab1[N_rec, 1], ab1[N_rec, 2]
+                a2_100, b2_100 = ab2[N_rec, 1], ab2[N_rec, 2]
+                ab1[N_rec+1:N_coeff, 1:2] .= repeat([a1_100 b1_100], N_coeff - N_rec, 1)
+                ab2[N_rec+1:N_coeff, 1:2] .= repeat([a2_100 b2_100], N_coeff - N_rec, 1)
         else
                 ab1 .= recur_coeff(w_fn1, supp, N_coeff, Nquad)
                 ab2 .= recur_coeff(w_fn2, supp, N_coeff, Nquad)
@@ -214,7 +214,7 @@ let
                 #U_ρ_Ud = add(0.5 * swapprime(dag(U_ρ_Ud), 0 => 1), 0.5 * U_ρ_Ud; maxdim = 2 * maxdim)
                 U_ρ_Ud = normalize(ITensors.truncate(ITensors.truncate(U_ρ_Ud; maxdim = 20, site_range = (1:(Int(floor(3*N_chain / 4))))); maxdim = 40, site_range = (tot_chain:tot_chain-(Int(floor((3*N_chain / 4)))))))
                 orthogonalize!(U_ρ_Ud, findfirst(==(maxlinkdim(U_ρ_Ud)), linkdims(U_ρ_Ud)))
-                if t % 5 == 0
+                if t % 10 == 0
                         H_U_ρ_Ud = apply(heat_op, U_ρ_Ud; cutoff = cutoff)
                         H_H_U_ρ_Ud = apply(heat_op, H_U_ρ_Ud; cutoff = cutoff)
                         @show mQ = real(tr(H_U_ρ_Ud))
