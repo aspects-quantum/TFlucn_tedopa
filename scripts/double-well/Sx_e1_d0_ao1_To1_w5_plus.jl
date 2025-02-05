@@ -63,7 +63,7 @@ end
 
 
 # Method definitions must be at the top level, not inside functions
-ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = [1.0 0.; 0. 0.]  # Adjusted normalization of the spin state
+ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = [1. 1.; 1. 1.] ./2 # Adjusted normalization of the spin state
 ITensors.op(::OpName"0", ::SiteType"Qudit", d::Int) = 1.0I[1:d, 1] * 1.0I[1:d, 1]'
 ITensors.op(::OpName"Idd", ::SiteType"Qudit", d::Int) = (1 / d) * Matrix(1.0I, d, d)
 ITensors.op(::OpName"Idd", ::SiteType"S=1/2") = (1 / 2) * Matrix(1.0I, 2, 2)
@@ -75,12 +75,12 @@ let
         @show file_name_txt_obs
 
         # Define parameters for simulation
-        cut = -11  # Cutoff for singular values
+        cut = -12  # Cutoff for singular values
         cutoff = 10.0^cut
         maxdim = 80
         tau = 0.005  # Time step duration
-        jump = 10
-        nt = 700  # Number of time steps
+        jump = 5
+        nt = 2000  # Number of time steps
         ttotal = nt * tau  # Total time evolution
 
         N_chain = 160  # Number of chain sites for a single chain-transformed environment
@@ -89,7 +89,7 @@ let
 
         println(S_pos)
 
-        n1_bsn_dim = 12
+        n1_bsn_dim = 14  # Dimension of chain sites
         b_dim_real = [n1_bsn_dim - round(Int64, (n1_bsn_dim - 3.6) * (i - 1) / (N_chain - 1)) for i in 1:N_chain]  # Dimension of chain sites
         b_dim_tilde = [Int(n1_bsn_dim - 4 - round(Int64, (n1_bsn_dim - 4 - 1.6) * (i - 1) / (N_chain - 1))) for i in 1:N_chain]
         boson_dim = append!(reverse(b_dim_tilde), [0], b_dim_real)
@@ -111,7 +111,6 @@ let
 
         t_list = collect(0:1:nt) * tau
         α = 0.1
-        mean_Q = Float64[]
 
         support_cutoff = 700
         supp = (0, support_cutoff)  # Support of the weight function
@@ -144,29 +143,29 @@ let
                 ab2 .= recur_coeff(w_fn2, supp, N_coeff, Nquad)
         end
 
-        OBS = MPO(OpSum() + (1, "Sz", S_pos), s_total)
+        OBS = MPO(OpSum() + (1, "Sx", S_pos), s_total)
         evol = dw_unit_gates(ω_0, Ω, c_01, c_02, ab1, ab2, tau, s_total)
 
         # Initialize characteristic function vector
-        char_fn = Vector{ComplexF64}()
-        t_plot = Vector{Float64}()
+        t_plot = Float64[]
 
-        obs_list = []
+        obs_list = Float64[]
 
         # Time evolution of density matrix
-        U_ρ_Ud = deepcopy(ρ)
-        O_U_ρ_Ud = apply(OBS, U_ρ_Ud; cutoff = cutoff)
+        U_ρ_Ud = ρ
+        O_U_ρ_Ud = apply(OBS, U_ρ_Ud; cutoff = 0.1*cutoff)
         @show obs = real(tr(O_U_ρ_Ud))
         push!(obs_list, obs)
-        write_for_loop(file_name_txt_obs, string(1), "$(model) boson: T = $T, alpha = $α, N_chain = $N_chain, maxdim = $maxdim, cutoff = $cut, tau = $tau, jump = $jump, boson_dim = $n1_bsn_dim")
+        write_for_loop(file_name_txt_obs, string(1), "$(model) boson: T = $T, alpha = $α, N_chain = $N_chain, maxdim = $maxdim, cutoff = $cut, tau = $tau, jump = $jump, omega_C = $ω_C, boson_dim = $n1_bsn_dim")
         write_for_loop(file_name_txt_obs, string(2), string(obs))
 
         for t in 1:nt
-                U_ρ_Ud = apply(evol, U_ρ_Ud; cutoff, maxdim, apply_dag = true)
+                U_ρ_Ud = normalize(apply(evol, U_ρ_Ud; cutoff, maxdim, apply_dag = true))
                 #U_ρ_Ud = add(0.5 * swapprime(dag(U_ρ_Ud), 0 => 1), 0.5 * U_ρ_Ud; maxdim = 2 * maxdim)
                 #U_ρ_Ud = normalize(ITensors.truncate(ITensors.truncate(U_ρ_Ud; maxdim = 5, site_range = (1:(Int(3*floor(N_chain / 4))))); maxdim = 20, site_range = (tot_chain:tot_chain-(Int(floor(3*(N_chain / 4)))))))
                 orthogonalize!(U_ρ_Ud, S_pos)
-                if t % jump == 0
+                if t % jump == 1
+                        U_ρ_Ud /= tr(U_ρ_Ud)
                         O_U_ρ_Ud = apply(OBS, U_ρ_Ud; cutoff = cutoff)
 
                         @show obs = real(tr(O_U_ρ_Ud))
@@ -178,5 +177,5 @@ let
                 @show maxlinkdim(U_ρ_Ud)
         end
 
-        write_to_file(file_name_txt_obs, "$(model) boson: T = $T, alpha = $α, N_chain = $N_chain, maxdim = $maxdim, cutoff = $cut, tau = $tau, boson_dim = $n1_bsn_dim", string(obs_list))
+        write_to_file(file_name_txt_obs, "$(model) boson: T = $T, alpha = $α, N_chain = $N_chain, maxdim = $maxdim, cutoff = $cut, tau = $tau, omega_C = $ω_C, boson_dim = $n1_bsn_dim", string(obs_list))
 end
