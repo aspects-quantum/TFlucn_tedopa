@@ -1,0 +1,249 @@
+using DrWatson, Plots, LaTeXStrings
+using Plots.PlotMeasures
+
+gr()  # Use GR backend, but you can switch to PyPlot if needed
+function ticks_length!(;tl=0.02)
+    p = Plots.current()
+    xticks, yticks = Plots.xticks(p)[1][1], Plots.yticks(p)[1][1]
+    xl, yl = Plots.xlims(p), Plots.ylims(p)
+    x1, y1 = zero(yticks) .+ xl[1], zero(xticks) .+ yl[1]
+    sz = p.attr[:size]
+    r = sz[1]/sz[2]
+    dx, dy = tl*(xl[2] - xl[1]), tl*r*(yl[2] - yl[1])
+    plot!([xticks xticks]', [y1 y1 .+ dy]', c=:black, labels=false)
+    plot!([x1 x1 .+ dx]', [yticks yticks]', c=:black, labels=false, xlims=xl, ylims=yl)
+    return Plots.current()
+end
+# Define data
+
+
+T = 0.1
+α = 0.5
+
+#T = 0, alpha = 0.1, N_chain = 180, maxdim = 80, cutoff = -12, tau = 0.005, boson_dim = 16, omega_C = 5, jump = 5;
+
+mQ1 = [1.1548289194346837e-10;
+0.0003120066328231101;
+0.010988441634399096;
+0.03510680762979128;
+0.06878226688970603;
+0.10775388778786078;
+0.1483002897657531;
+0.18708027226396692;
+0.2232064037376123;
+0.25566161753916233;
+0.2842526784069933;
+0.30940410592089534;
+0.3312218836552533;
+0.35023510324383667;
+0.3668965575602423;
+0.38162123500430595;
+0.39448260167444754;
+0.4053872621154928;
+0.4148079052848426;
+0.4230477847178284;
+0.43004908882744225;
+0.4367979096234406;
+0.4429907738504922;
+0.44736008954582884;
+0.4526291824913432;
+0.45745338401469443;
+0.4616871493264878;
+0.46573889318876244;
+0.46933914635266333;
+0.4726285588516753;
+0.47561473226252826;
+0.4786240736024611;
+0.4816900129063305;
+0.48463623111105764;
+0.48760153190358885;
+0.4907350983944678;
+0.4940604505325087;
+0.4957741402277561;
+0.49829185428067235;
+0.5016008041844393;
+0.5035923894714975;
+0.5072628038625253;
+0.5092023339295692;
+0.5096685323671432;
+0.5085039210458027;
+0.5119114526007742;
+0.5142886510781237;
+0.5163100877976441;
+0.5182913231707477;
+0.5149499751283063;
+0.5168067640756963;
+0.5168455299633741;
+
+]
+vQ1 = [1.316148913939056e-20;
+9.740525905711966e-8;
+0.16236435732124363;
+0.502355944139672;
+0.9409905990755112;
+1.3941483729853192;
+1.8070561455917493;
+2.138830656067847;
+2.400611658289239;
+2.595311910418992;
+2.7328090923771016;
+2.838468472777996;
+2.9030724606101814;
+2.9527858471205604;
+2.9984414771936456;
+3.049872726235353;
+3.040668437683771;
+3.032236370681957;
+3.0330621004013105;
+3.033041816257962;
+3.0155227516220577;
+3.000509301994374;
+2.979393067482374;
+2.960931203088789;
+2.954967159035859;
+2.9598621843564943;
+2.9408652284298995;
+2.9053274615913933;
+2.9067298358475377;
+2.8836213379886764;
+2.8381961226345527;
+2.8249143998850967;
+2.8258486276900654;
+2.833255859435108;
+2.8252915650011445;
+2.819992220313522;
+2.8307617494871873;
+2.815485857234638;
+2.807103963234848;
+2.8115050515091697;
+2.7957759886669034;
+2.7464461143520733;
+2.7386640067967525;
+2.667417333540646;
+2.6676017391595215;
+2.714545986754626;
+2.5196616304329904;
+2.494442315703144;
+2.5043524909511583;
+2.2771230364291752;
+2.184116047587022;
+2.2104547045274905;
+]
+#
+
+#T = 0, alpha = 1.5, N_chain = 180, maxdim = 80, cutoff = -12, tau = 0.005, boson_dim = 16, omega_C = 5, jump = 5;
+mQ2 = [2.4292158838401497e-10;
+0.0046799828250777085;
+0.16482678771973344;
+0.5265580201407486;
+1.0330182808866737;
+1.6178969357605857;
+2.2238196508644723;
+2.8092266880836285;
+3.3495715522196865;
+3.834020550656686;
+4.258576460052674;
+4.636559118728705;
+4.954497019954804;
+5.2313329263229384;
+5.469209772812501;
+5.674007499900834;
+5.8510085929372195;
+6.003766257216114;
+6.135702847410954;
+6.250515265853334;
+6.350243119945167;
+6.43640891032271;
+6.510810386176094;
+6.577169579510763;
+6.635138893195992;
+6.683791155192243;
+6.728594176860648;
+]
+
+#T = 0, alpha = 1.5, N_chain = 180, maxdim = 80, cutoff = -12, tau = 0.005, boson_dim = 16, omega_C = 5, jump = 5;
+
+vQ2 = [6.367301730915374e-20;
+2.1914029432656162e-5;
+2.4608508356961396;
+7.8002137770964275;
+15.130750435307947;
+23.38467446426539;
+31.6932787531177;
+39.51367174098088;
+46.499071452011734;
+52.642291780279734;
+57.70517226975717;
+62.31069811657466;
+66.00824057388694;
+69.21501685350141;
+71.64744648661784;
+74.07400916028;
+75.98008466897875;
+77.60343290192013;
+78.90639718855634;
+80.07910721726628;
+81.0798758683694;
+81.97533175135142;
+82.7727447632775;
+83.19512418487638;
+83.73081243670603;
+84.11794264323704;
+84.53365170460795;
+]
+
+
+
+
+mQ1 = mQ1[1:26]
+vQ1 = vQ1[1:26]
+mQ2 = mQ2[1:26]
+vQ2 = vQ2[1:26]
+
+ω_C = 5
+
+
+# Time step duration
+tau = 0.005  
+
+
+time_steps = collect(0:lastindex(mQ1)-1)*5*tau*ω_C
+
+# Set tick positions and convert tick labels to LaTeX strings automatically
+xticks = range(0.2, stop = maximum(time_steps[end-1]), length = 5)
+yticks1 = range(0, stop = 6, length = 5)
+yticks2 = range(0, stop = 100, length = 5)
+
+xtick_labels = [string(round(x, digits = 1)) for x in xticks]
+ytick_labels1 = [string(round(y, digits = 1)) for y in yticks1]
+ytick_labels2 = [string(round(y, digits = 1)) for y in yticks2]
+
+#p1 = plot(time_steps, mQ1, color = :lightgray, seriesalpha = 1, linewidth = 5, label = false)
+#plot!(time_steps, mQ2, color = :lightgray, seriesalpha = 1, linewidth = 5, label = false)
+p1 = scatter(time_steps, mQ1, markersize=6, markerstrokewidth=1, xaxis = L"tω_C", yaxis = L"\langle Q \rangle", 
+xticks = (xticks, xtick_labels), yticks = (yticks1, ytick_labels1),
+xtickfont = font(16), ytickfont = font(16), 
+xguidefontsize=24,yguidefontsize=24, color = :teal, legendfontsize = 12, label = L"\  \alpha = 0.1")
+scatter!(time_steps, mQ2, markersize=6, markerstrokewidth=1, color = :lightcoral, label = L"\ \alpha = 1.5")
+
+#= 
+curves!(twinx(), x, 2 * cos.(x), yaxis = "Y label 2"; kw...)
+ =#
+
+plot!(time_steps, vQ1, line = :dot, color = :teal, seriesalpha = 1, linewidth = 7, label = false)
+plot!(twinx(),time_steps, vQ2, line = :dot, color = :lightcoral,ytickfont = font(16), yticks = (yticks2, ytick_labels2),
+seriesalpha = 1, linewidth = 7, label = false,yguidefontsize=24, yaxis = L"\langle\langle Q^2 \rangle\rangle")
+
+
+plot!(widen=false)
+vline!([xlims(p1)[2]], lc=:black, lw=2, label = false)
+hline!([ylims(p1)[2]], lc=:black, lw=2, label = false)
+#plot!(legend = :outertopright)
+
+#ticks_length!(tl=.02)
+
+# Customize plot appearance, place legend inside
+plot!(legend = :bottomright, grid = false, legendfontsize = 14, left_margin = [2mm 0mm], right_margin = [0mm 3mm], bottom_margin = [3mm 3mm])   #,framestyle = :box), legendposition = (1.6, 0.7)
+
+display("image/png",p1)
+
