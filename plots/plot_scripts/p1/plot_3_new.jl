@@ -2,7 +2,8 @@ using DrWatson, Plots, LaTeXStrings
 using Plots.PlotMeasures
 
 gr()  # Use GR backend, but you can switch to PyPlot if needed
-function ticks_length!(;tl=0.02)
+#pyplot()
+function ticks_length!(;tl=0.03)
     p = Plots.current()
     xticks, yticks = Plots.xticks(p)[1][1], Plots.yticks(p)[1][1]
     xl, yl = Plots.xlims(p), Plots.ylims(p)
@@ -143,40 +144,50 @@ mQ3_exact = f.(time_steps, 0.75)
 
 
 # Set tick positions and convert tick labels to LaTeX strings automatically
-xticks = (0 : 1 : maximum(time_steps[end-1]))[2:end] #range(0.2, stop = maximum(time_steps[end-1]), length = 6)
-yticks1 = (0 : 7 : 7) 
-yticks2 = (0 : 85 : 85) 
+xticks1 = (0 : 1 : maximum(time_steps[end-1]))[2:end] #range(0.2, stop = maximum(time_steps[end-1]), length = 6)
+xticks2 = (0 : 1 : maximum(time_steps[end-1]))[2:end] #range(0.2, stop = maximum(time_steps[end-1]), length = 6)
+yticks1 = (0 : 1.75 : 7) 
+yticks2 = (0 : 20 : 85) 
 
-xtick_labels = [string(Int(round(x, digits = 1))) for x in xticks]
-ytick_labels1 = [string(round(y, digits = 1)) for y in yticks1]
-ytick_labels2 = [string(Int(round(y, digits = 1))) for y in yticks2]
+xtick_labels2 = [string(Int(round(x, digits = 1))) for x in xticks2]
+xtick_labels1 = [" " for x in xticks1]
+#ytick_labels1 = [string(round(y, digits = 1)) for y in yticks1]
+ytick_labels1 = [((y == yticks1[1])|| (y == yticks1[end])) ? string(Int(round(y, digits = 1))) : " " for y in yticks1]
+ytick_labels2 = [((y == yticks2[1])|| (y == yticks2[end])) ? string(Int(round(y, digits = 1))) : " " for y in yticks2]
 
-p1 = plot(time_steps, mQ1_exact, color = :lightgray, seriesalpha = 1, linewidth = 5, label = false)
+p1 = plot(time_steps, mQ1_exact, color = :lightgray, seriesalpha = 1, linewidth = 5, label = false, top_margin = 10mm)
 plot!(time_steps, mQ2_exact, color = :lightgray, seriesalpha = 1, linewidth = 5, label = false)
 plot!(time_steps, mQ3_exact, color = :lightgray, seriesalpha = 1, linewidth = 5, label = false)
-scatter!(time_steps[1:2:end], mQ1[1:2:end], markersize=10, markerstrokewidth=1, yaxis = L"\langle Q \rangle",  #xaxis = L"tω_C", 
-xticks = (xticks, xtick_labels), yticks = (yticks1, ytick_labels1),
+#scatter!(time_steps[1:2:end], mQ1[1:2:end], markersize=7, markerstrokewidth=1, yaxis = L"\langle Q \rangle_{~~}",  #xaxis = L"tω_C", 
+scatter!(time_steps[1:2:end], mQ1[1:2:end], markersize=10, markerstrokewidth=1,  #xaxis = L"tω_C", 
+xticks = (xticks1, xtick_labels1), yticks = (yticks1, ytick_labels1),
 xtickfont = font(24), ytickfont = font(24), 
 xguidefontsize=40,yguidefontsize=35, color = :teal, label = L"\  (1, 1.5)")
+#p1.yaxis.set_label_coords(-.1, .5)
 scatter!(time_steps[2:4:end], mQ2[2:4:end], markersize=10, markerstrokewidth=1, color = :lightcoral, label = L"\ (0.1, 0.75)")
 scatter!(time_steps[1:4:end], mQ3[1:4:end], markersize=10, markerstrokewidth=1, color = :lightblue,label = L"\ (1, 0.75)")
-plot!(xticks=false)
+#plot!(xticks=true)
 plot!(legend=false)
 plot!(widen=false)
+plot!(ylims = [0, 7.5])
 vline!([xlims(p1)[2]], lc=:black, lw=2, label = false)
 hline!([ylims(p1)[2]], lc=:black, lw=2, label = false)
 plot!(grid = false)
-ticks_length!(tl=.04)
+ticks_length!(tl=.03)
 #= 
 curves!(twinx(), x, 2 * cos.(x), yaxis = "Y label 2"; kw...)
  =#
 
-p2 = scatter(time_steps[1:2:end], vQ1[1:2:end], markersize=10, markerstrokewidth=1, color = :teal, seriesalpha = 1, xaxis = L"tω_C", linewidth = 7, label = L"\  (1, 1.5)")
+p2 = scatter(time_steps[1:2:end], vQ1[1:2:end], markersize=10, markerstrokewidth=1, color = :teal, seriesalpha = 1, linewidth = 7, label = L"\  (1, 1.5)")
+#scatter(time_steps[1:2:end], vQ1[1:2:end], markersize=10, markerstrokewidth=1, color = :teal, seriesalpha = 1, xaxis = L"tω_C", linewidth = 7, label = L"\  (1, 1.5)")
 scatter!(time_steps[2:2:end], vQ2[2:2:end], markersize=10, markerstrokewidth=1, color = :lightcoral,seriesalpha = 1, linewidth = 7, label = L"\ (0.1, 0.75)")
-scatter!(time_steps[1:2:end], vQ3[1:2:end], markersize=10, markerstrokewidth=1, color = :lightblue,xtickfont = font(24), ytickfont = font(24), xticks = (xticks, xtick_labels),  yticks = (yticks2, ytick_labels2),
-seriesalpha = 1, linewidth = 7, label = L"\ (1, 0.75)",xguidefontsize=40,yguidefontsize=35, yaxis = L"\langle\langle Q^2 \rangle\rangle")
+#scatter!(time_steps[1:2:end], vQ3[1:2:end], markersize=7, markerstrokewidth=1, color = :lightblue,xtickfont = font(24), ytickfont = font(24), xticks = (xticks2, xtick_labels2),  yticks = (yticks2, ytick_labels2),
+#seriesalpha = 1, linewidth = 7, label = L"\ (1, 0.75)",xguidefontsize=40,yguidefontsize=35, yaxis = L"\langle\langle Q^2 \rangle\rangle")
+scatter!(time_steps[1:2:end], vQ3[1:2:end], markersize=10, markerstrokewidth=1, color = :lightblue,xtickfont = font(24), ytickfont = font(24), xticks = (xticks2, xtick_labels2),  yticks = (yticks2, ytick_labels2),
+seriesalpha = 1, linewidth = 7, label = L"\ (1, 0.75)",xguidefontsize=40,yguidefontsize=35)
 #plot!(yaxis=:right)
 plot!(widen=false)
+plot!(ylims = [0, 95], bottom_margin = 10mm)
 vline!([xlims(p2)[2]], lc=:black, lw=2, label = false)
 hline!([ylims(p2)[2]], lc=:black, lw=2, label = false)
 plot!(grid = false)
@@ -185,7 +196,7 @@ plot!(legend = false)
 #= plot!(legend = (.6,0.7), grid = false, legendfontsize = 13) #, left_margin = [2mm 0mm], right_margin = [0mm 3mm], bottom_margin = [3mm 3mm])   #,framestyle = :box), legendposition = (1.6, 0.7)
 plot!(legendtitle=L"(T,\ \alpha)", legendtitlefontsize=15)
  =#
-ticks_length!(tl=.04)
+ticks_length!(tl=.03)
 
 # Create an empty plot for legend only (no axes, no frame)
 p3 = plot(framestyle=:none, grid=false, legendfontsize=25)
@@ -195,11 +206,12 @@ scatter!([], [], markersize=1, markerstrokewidth=.1, color=:lightblue, label=L"\
 plot!(legendtitle=L"\ \ \ T\ \ \ \ \alpha", legendtitlefontsize=32)
 plot!(foreground_color_legend = nothing, background_color_legend = :white)
 
-#custom_layout = @layout [[a;b] c{0.25w}]  # P1 takes 60% of the column height
-#p=plot(p1, p2, p3, layout=custom_layout, size = (900, 800), margin = 5mm)
+#= custom_layout = @layout [[a;b] c{0.25w}]  # P1 takes 60% of the column height
+p=plot(p1, p2, p3, layout=custom_layout, size = (900, 800), margin = -2.0mm, left_margin = 10mm)
+ =#
 
-custom_layout = @layout [[a;b] c{0.25w}]  # P1 takes 60% of the column height
-p=plot(p1, p2, p3, layout=custom_layout, size = (900, 800), margin = 5mm)
+custom_layout = @layout [a;b]  # P1 takes 60% of the column height
+p=plot(p1, p2, layout=custom_layout, size = (900, 1100), margin = -8.8mm, left_margin = 10mm, right_margin = 10mm)
 
 display("image/png",p)
 
