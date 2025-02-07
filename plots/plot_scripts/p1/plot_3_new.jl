@@ -201,6 +201,5 @@ plot!(foreground_color_legend = nothing, background_color_legend = :white)
 custom_layout = @layout [[a;b] c{0.25w}]  # P1 takes 60% of the column height
 p=plot(p1, p2, p3, layout=custom_layout, size = (900, 800), margin = 5mm)
 
-
 display("image/png",p)
 
