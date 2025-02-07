@@ -75,14 +75,15 @@ let
         @show file_name_txt_obs
 
         # Define parameters for simulation
-        cut = -12  # Cutoff for singular values
+        cut = -11  # Cutoff for singular values
         cutoff = 10.0^cut
         maxdim = 80
-        tau = 0.002  # Time step duration
-        nt = 2000  # Number of time steps
+        tau = 0.005  # Time step duration
+        jump = 10
+        nt = 700  # Number of time steps
         ttotal = nt * tau  # Total time evolution
 
-        N_chain = 160  # Number of chain sites for a single chain-transformed environment
+        N_chain = 140  # Number of chain sites for a single chain-transformed environment
         tot_chain = 2 * N_chain + 1
         S_pos = N_chain + 1
 
@@ -105,11 +106,11 @@ let
         model = (ω_0 == 1) ? "local" : "tunnel"
         model = (Ω == 1) ? "tunnel" : "local"
 
-        T = 1  # Temperature of bath
+        T = .1  # Temperature of bath
         β = 1 / T
 
         t_list = collect(0:1:nt) * tau
-        α = 0.1
+        α = 1.5
         mean_Q = Float64[]
 
         support_cutoff = 700
@@ -157,15 +158,15 @@ let
         O_U_ρ_Ud = apply(OBS, U_ρ_Ud; cutoff = cutoff)
         @show obs = real(tr(O_U_ρ_Ud))
         push!(obs_list, obs)
-        write_for_loop(file_name_txt_obs, string(1), "$(model) boson: T = $T, alpha = $α, N_chain = $N_chain, maxdim = $maxdim, cutoff = $cut, tau = $tau, boson_dim = $n1_bsn_dim")
-
+        write_for_loop(file_name_txt_obs, string(1), "$(model) boson: T = $T, alpha = $α, N_chain = $N_chain, maxdim = $maxdim, cutoff = $cut, tau = $tau, jump = $jump, boson_dim = $n1_bsn_dim")
+        write_for_loop(file_name_txt_obs, string(2), string(obs))
 
         for t in 1:nt
                 U_ρ_Ud = apply(evol, U_ρ_Ud; cutoff, maxdim, apply_dag = true)
                 #U_ρ_Ud = add(0.5 * swapprime(dag(U_ρ_Ud), 0 => 1), 0.5 * U_ρ_Ud; maxdim = 2 * maxdim)
-                U_ρ_Ud = normalize(ITensors.truncate(ITensors.truncate(U_ρ_Ud; maxdim = 20, site_range = (1:(Int(floor(N_chain / 2))))); maxdim = 40, site_range = (tot_chain:tot_chain-(Int(floor((N_chain / 2)))))))
+                U_ρ_Ud = normalize(ITensors.truncate(ITensors.truncate(U_ρ_Ud; maxdim = 5, site_range = (1:(Int(3*floor(N_chain / 4))))); maxdim = 20, site_range = (tot_chain:tot_chain-(Int(floor(3*(N_chain / 4)))))))
                 orthogonalize!(U_ρ_Ud, S_pos)
-                if t % 5 == 0
+                if t % jump == 0
                         O_U_ρ_Ud = apply(OBS, U_ρ_Ud; cutoff = cutoff)
 
                         @show obs = real(tr(O_U_ρ_Ud))

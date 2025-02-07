@@ -2,10 +2,9 @@
 
 This is a package[^SBmodel] for calculating moments of heat transfer in the Spin-Boson model[^PRX2020] using the **Time Evolving Density matrices using Orthogonal Polynomial Algorithm (_TEDOPA_)**[^Prior2010][^Chin2010]. 
 
-We also employ the **Temperature-dependent spectral density (_T-SD_)** approach[^PRL2019] that enables us to use a vacuum initial matrix product state (pure) for the environment instead of a thermal state (mixed), thereby speeding up the computation greatly.
+We also employ the **Thermofield-based chain-mapping approach for open quantum systems**[^PRA2015] that enables us to use a vacuum initial matrix product state (pure) for the environment instead of a thermal state (mixed), thereby speeding up the computation greatly.
 
 In this package, we use the ITensor library[^Itensor] in Julia for tensor network manipulations.
-
 
 &nbsp;
 
@@ -36,8 +35,7 @@ a reproducible scientific project named SBmodel
 
 [^Chin2010]: Chin, Alex W., Ángel Rivas, Susana F. Huelga, and Martin B. Plenio. "Exact mapping between system-reservoir quantum models and semi-infinite discrete chains using orthogonal polynomials." Journal of Mathematical Physics 51, no. 9 (2010): 092109.
 
-
-[^PRL2019]: Tamascelli, Dario, Andrea Smirne, James Lim, Susana F. Huelga, and Martin B. Plenio. "Efficient simulation of finite-temperature open quantum systems." Physical Review Letters 123, no. 9 (2019): 090402.
+[^PRA2015]: de Vega, Inés, and Mari-Carmen Banuls. "Thermofield-based chain-mapping approach for open quantum systems." Physical Review A 92, no. 5 (2015): 052116.
 
 [^Itensor]: https://itensor.github.io/ITensors.jl/dev/index.html
 
