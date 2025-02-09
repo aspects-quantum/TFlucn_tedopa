@@ -99,13 +99,13 @@ let
 	nt = 2000
 	ttotal = nt * tau  # Total time evolution
 
-	N_chain = 150  # Number of chain sites for a single chain-transformed environment
+	N_chain = 160  # Number of chain sites for a single chain-transformed environment
 	tot_chain = N_chain + 1
 	S_pos = 1
 
 	println(S_pos)
 
-	n1_bsn_dim = 16  # Dimension of chain sites
+	n1_bsn_dim = 14  # Dimension of chain sites
 	b_dim_real = [n1_bsn_dim - round(Int64, (n1_bsn_dim - 3.6) * (i - 1) / (N_chain - 1)) for i in 1:N_chain]  # Dimension of chain sites
 	boson_dim = append!([0], b_dim_real)
 
