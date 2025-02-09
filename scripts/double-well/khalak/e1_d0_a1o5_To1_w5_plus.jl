@@ -208,11 +208,11 @@ let
     @show mQ = real(tr(H_U_ρ_Ud))
     @show vQ = real(tr(H_H_U_ρ_Ud))
     push!(mean_Q, mQ)
-    push!(var_Q, vQ)
+    push!(var_Q, vQ-mQ^2)
     write_for_loop(file_name_txt_m, string(1), "$(model) boson: T = $T, alpha = $α, N_chain = $N_chain, maxdim = $maxdim, cutoff = $cut, tau = $tau, jump = $jump, boson_dim = $n1_bsn_dim, omega = $ω_C")
     write_for_loop(file_name_txt_v, string(1), "$(model) boson: T = $T, alpha = $α, N_chain = $N_chain, maxdim = $maxdim, cutoff = $cut, tau = $tau, jump = $jump, boson_dim = $n1_bsn_dim, omega = $ω_C")
     write_for_loop(file_name_txt_m, string(2), string(mQ))
-    write_for_loop(file_name_txt_v, string(2), string(vQ))
+    write_for_loop(file_name_txt_v, string(2), string(vQ-mQ^2))
 
     for t in 1:nt
         U_ρ_Ud = normalize(apply(evol, U_ρ_Ud; cutoff, maxdim, apply_dag=true))
@@ -227,9 +227,9 @@ let
             @show mQ = real(tr(H_U_ρ_Ud))
             @show vQ = real(tr(H_H_U_ρ_Ud))
             write_for_loop(file_name_txt_m, string(t + 1), string(mQ))
-            write_for_loop(file_name_txt_v, string(t + 1), string(vQ))
+            write_for_loop(file_name_txt_v, string(t + 1), string(vQ-mQ^2))
             push!(mean_Q, mQ)
-            push!(var_Q, vQ)
+            push!(var_Q, vQ-mQ^2)
         end
 
         @show t * tau
