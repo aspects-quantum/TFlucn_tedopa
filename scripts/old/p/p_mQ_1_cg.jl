@@ -22,7 +22,7 @@ ITensors.op(::OpName"Idd", ::SiteType"S=1/2") = (1 / 2) * Matrix(1.0I, 2, 2)
 
 
 
-cut = -11
+cut = -12
 cutoff = 10.0^cut
 maxdim = 40
 tau = 0.002             ## time step duration
