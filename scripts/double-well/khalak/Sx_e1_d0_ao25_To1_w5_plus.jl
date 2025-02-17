@@ -26,20 +26,20 @@ function dw_unit_gates(ω_0, Ω, c_01, c_02, ab1, ab2, tau, s_total)
                         ω_n = ω_n_total[j]
                         t_n = t_n_total[j]
                         hj = (-ω_n) * op("N", s1) * op("Id", s2) +
-                                 (-t_n) * op("Adag", s1) * op("A", s2) +
-                                 (-t_n) * op("A", s1) * op("Adag", s2)
+                             (-t_n) * op("Adag", s1) * op("A", s2) +
+                             (-t_n) * op("A", s1) * op("Adag", s2)
                         Gj = exp(-im * (tau / 2) * hj)
                         push!(gates, Gj)
 
                 elseif j == S_pos
                         hj = ω_0 * op("Sz", s_total[j]) * op("Id", s_total[j+1]) +
-                                 Ω * op("Sx", s_total[j]) * op("Id", s_total[j+1]) +
-                                 c_01 * op("Sx", s_total[j]) * op("A", s_total[j+1]) +
-                                 c_02 * op("Sx", s_total[j]) * op("Adag", s_total[j+1])
+                             Ω * op("Sx", s_total[j]) * op("Id", s_total[j+1]) +
+                             c_01 * op("Sx", s_total[j]) * op("A", s_total[j+1]) +
+                             c_02 * op("Sx", s_total[j]) * op("Adag", s_total[j+1])
                         Gj = exp(-im * (tau / 2) * hj)
                         push!(gates, Gj)
                         hj = c_02 * op("Sx", s_total[j]) * op("A", s_total[j-1]) +
-                                 c_02 * op("Sx", s_total[j]) * op("Adag", s_total[j-1])
+                             c_02 * op("Sx", s_total[j]) * op("Adag", s_total[j-1])
                         Gj = exp(-im * (tau / 2) * hj)
                         push!(gates, Gj)
 
@@ -50,8 +50,8 @@ function dw_unit_gates(ω_0, Ω, c_01, c_02, ab1, ab2, tau, s_total)
                         ω_n = ω_n_total[j]
                         t_n = t_n_total[j]
                         hj = ω_n * op("N", s1) * op("Id", s2) +
-                                 t_n * op("Adag", s1) * op("A", s2) +
-                                 t_n * op("A", s1) * op("Adag", s2)
+                             t_n * op("Adag", s1) * op("A", s2) +
+                             t_n * op("A", s1) * op("Adag", s2)
                         Gj = exp(-im * (tau / 2) * hj)
                         push!(gates, Gj)
                 end
@@ -63,7 +63,7 @@ end
 
 
 # Method definitions must be at the top level, not inside functions
-ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = [1. 1.; 1. 1.] ./2 # Adjusted normalization of the spin state
+ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = [1.0 1.0; 1.0 1.0] ./ 2 # Adjusted normalization of the spin state
 ITensors.op(::OpName"0", ::SiteType"Qudit", d::Int) = 1.0I[1:d, 1] * 1.0I[1:d, 1]'
 ITensors.op(::OpName"Idd", ::SiteType"Qudit", d::Int) = (1 / d) * Matrix(1.0I, d, d)
 ITensors.op(::OpName"Idd", ::SiteType"S=1/2") = (1 / 2) * Matrix(1.0I, 2, 2)
@@ -83,13 +83,13 @@ let
         nt = 10000  # Number of time steps
         ttotal = nt * tau  # Total time evolution
 
-        N_chain = 180  # Number of chain sites for a single chain-transformed environment
+        N_chain = 190  # Number of chain sites for a single chain-transformed environment
         tot_chain = 2 * N_chain + 1
         S_pos = N_chain + 1
 
         println(S_pos)
 
-        n1_bsn_dim = 14  # Dimension of chain sites
+        n1_bsn_dim = 12  # Dimension of chain sites
         b_dim_real = [n1_bsn_dim - round(Int64, (n1_bsn_dim - 3.6) * (i - 1) / (N_chain - 1)) for i in 1:N_chain]  # Dimension of chain sites
         b_dim_tilde = [Int(n1_bsn_dim - 4 - round(Int64, (n1_bsn_dim - 4 - 1.6) * (i - 1) / (N_chain - 1))) for i in 1:N_chain]
         boson_dim = append!(reverse(b_dim_tilde), [0], b_dim_real)
@@ -106,11 +106,11 @@ let
         model = (ω_0 == 1) ? "local" : "tunnel"
         model = (Ω == 1) ? "tunnel" : "local"
 
-        T = .1  # Temperature of bath
+        T = 0.1  # Temperature of bath
         β = 1 / T
 
         t_list = collect(0:1:nt) * tau
-        α = 0.1
+        α = 0.25
 
         support_cutoff = 700
         supp = (0, support_cutoff)  # Support of the weight function
@@ -153,20 +153,21 @@ let
 
         # Time evolution of density matrix
         U_ρ_Ud = ρ
-        O_U_ρ_Ud = apply(OBS, U_ρ_Ud; cutoff = 0.1*cutoff)
+        O_U_ρ_Ud = apply(OBS, U_ρ_Ud; cutoff=0.01 * cutoff)
         @show obs = real(tr(O_U_ρ_Ud))
         push!(obs_list, obs)
         write_for_loop(file_name_txt_obs, string(1), "$(model) boson: T = $T, alpha = $α, N_chain = $N_chain, maxdim = $maxdim, cutoff = $cut, tau = $tau, jump = $jump, omega_C = $ω_C, boson_dim = $n1_bsn_dim")
         write_for_loop(file_name_txt_obs, string(2), string(obs))
 
         for t in 1:nt
-                U_ρ_Ud = normalize(apply(evol, U_ρ_Ud; cutoff, maxdim, apply_dag = true))
+                U_ρ_Ud = normalize(apply(evol, U_ρ_Ud; cutoff, maxdim, apply_dag=true))
                 #U_ρ_Ud = add(0.5 * swapprime(dag(U_ρ_Ud), 0 => 1), 0.5 * U_ρ_Ud; maxdim = 2 * maxdim)
                 #U_ρ_Ud = normalize(ITensors.truncate(ITensors.truncate(U_ρ_Ud; maxdim = 5, site_range = (1:(Int(3*floor(N_chain / 4))))); maxdim = 20, site_range = (tot_chain:tot_chain-(Int(floor(3*(N_chain / 4)))))))
                 orthogonalize!(U_ρ_Ud, S_pos)
                 if t % jump == 1
                         U_ρ_Ud /= tr(U_ρ_Ud)
-                        O_U_ρ_Ud = apply(OBS, U_ρ_Ud; cutoff = cutoff)
+                        normalize!(U_ρ_Ud)
+                        O_U_ρ_Ud = apply(OBS, U_ρ_Ud; cutoff=0.01*cutoff)
 
                         @show obs = real(tr(O_U_ρ_Ud))
                         write_for_loop(file_name_txt_obs, string(t + 1), string(obs))
