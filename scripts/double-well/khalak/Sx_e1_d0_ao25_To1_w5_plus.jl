@@ -77,7 +77,7 @@ let
         # Define parameters for simulation
         cut = -11  # Cutoff for singular values
         cutoff = 10.0^cut
-        maxdim = 80
+        maxdim = 90
         tau = 0.001  # Time step duration
         jump = 20
         nt = 10000  # Number of time steps
@@ -159,6 +159,13 @@ let
         write_for_loop(file_name_txt_obs, string(1), "$(model) boson: T = $T, alpha = $α, N_chain = $N_chain, maxdim = $maxdim, cutoff = $cut, tau = $tau, jump = $jump, omega_C = $ω_C, boson_dim = $n1_bsn_dim")
         write_for_loop(file_name_txt_obs, string(2), string(obs))
 
+        # use the following code to read the MPO density matrix from a file
+	#= name_string = string(split(split(@__FILE__, ".")[end-1], string('\\'))[end], "_1", ".h5")
+	fr = h5open(name_string, "r")
+	readMPO = MPO(s_total)
+	[readMPO[i] = read(fr, "ρ$i", ITensor) for i ∈ 1:eachindex(readMPO)[end]]
+        close(fr) =#    
+        
         for t in 1:nt
                 U_ρ_Ud = normalize(apply(evol, U_ρ_Ud; cutoff, maxdim, apply_dag=true))
                 #U_ρ_Ud = add(0.5 * swapprime(dag(U_ρ_Ud), 0 => 1), 0.5 * U_ρ_Ud; maxdim = 2 * maxdim)
@@ -173,6 +180,13 @@ let
                         write_for_loop(file_name_txt_obs, string(t + 1), string(obs))
                         push!(obs_list, obs)
                 end
+                # MPO store 
+		if t % 1000 == 1
+			name_string = string(split(split(@__FILE__, ".")[end-1], string('\\'))[end], "_$t.h5")
+			fw = h5open("$name_string", "w")
+			[write(fw, "ρ$i", U_ρ_Ud[i]) for i ∈ 1:eachindex(U_ρ_Ud)[end]]
+                        close(fw)
+		end
 
                 @show t * tau
                 @show maxlinkdim(U_ρ_Ud)
