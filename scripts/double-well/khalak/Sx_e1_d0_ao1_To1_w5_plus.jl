@@ -97,7 +97,8 @@ let
         s_total = [(n == S_pos) ? Index(2, "S=1/2") : Index(boson_dim[n], "Qudit") for n in 1:tot_chain]
 
         state = [(n == S_pos) ? "ρ" : "0" for n in 1:tot_chain]
-        ρ = normalize(MPO(s_total, state))
+        ρ /= tr(ρ)
+	normalize!(ρ)
 
         # Bath parameters
         ω_C = 5  # Bath cutoff
