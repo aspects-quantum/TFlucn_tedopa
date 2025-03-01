@@ -99,24 +99,6 @@ function dw_ham(ω_0, Ω, c_01, c_02, ab1, ab2, s_total)
 end
 
 ##########################################################################
-#=  mpo_to_mps(A::MPO; cutoff=1e-15)
-
-Convert an MPO of length `n` with pairs of primed
-and unprimed indices into an MPS of length `2n`
-where odd sites have the unprimed indices 
-of the MPO and even sites have the primed indices
-of the MPO. =#
-function mpo_to_mps(A::MPO; cutoff = 1e-14)
-	n = length(A)
-	A_mps = MPS(2n)
-	for j in 1:n
-		A_mps[2j-1], A_mps[2j] = factorize(
-			A[j], [linkinds(A, j - 1); filterinds(siteinds(A, j); plev = 0)]; cutoff,
-		)
-	end
-	return A_mps
-end
-##########################################################################
 
 
 # Method definitions must be at the top level, not inside functions
@@ -141,7 +123,7 @@ let
 	maxdim = 100
 	tau = 0.02  # Time step duration
 	jump = 20
-	nt = 500  # Number of time steps
+	nt = 1000  # Number of time steps
 	ttotal = nt * tau  # Total time evolution
 
 	N_chain = 180  # Number of chain sites for a single chain-transformed environment
