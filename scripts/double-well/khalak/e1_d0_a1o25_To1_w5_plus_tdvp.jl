@@ -204,11 +204,11 @@ let
 	@show mQ = real(inner(U_ψ', heat_op, U_ψ))
 	@show vQ = real(inner(heat_op, U_ψ, heat_op, U_ψ)) - mQ^2
 	push!(mean_Q, mQ)
-	push!(var_Q, vQ - mQ^2)
+	push!(var_Q, vQ)
 	write_for_loop(file_name_txt_m, string(1), "$(model) boson: T = $T, alpha = $α, N_chain = $N_chain, maxdim = $maxdim, cutoff = $cut, tau = $tau, jump = $jump, boson_dim = $n1_bsn_dim, omega = $ω_C")
 	write_for_loop(file_name_txt_v, string(1), "$(model) boson: T = $T, alpha = $α, N_chain = $N_chain, maxdim = $maxdim, cutoff = $cut, tau = $tau, jump = $jump, boson_dim = $n1_bsn_dim, omega = $ω_C")
 	write_for_loop(file_name_txt_m, string(2), string(mQ))
-	write_for_loop(file_name_txt_v, string(2), string(vQ - mQ^2))
+	write_for_loop(file_name_txt_v, string(2), string(vQ))
 
 	# use the following code to read the MPO density matrix from a file
 	#= name_string = string(split(split(@__FILE__, ".")[end-1], string('\\'))[end], "_1", ".h5")
@@ -224,9 +224,9 @@ let
 		@show mQ = real(inner(U_ψ', heat_op, U_ψ))
 		@show vQ = real(inner(heat_op, U_ψ, heat_op, U_ψ)) - mQ^2
 		write_for_loop(file_name_txt_m, string(t + 1), string(mQ))
-		write_for_loop(file_name_txt_v, string(t + 1), string(vQ - mQ^2))
+		write_for_loop(file_name_txt_v, string(t + 1), string(vQ))
 		push!(mean_Q, mQ)
-		push!(var_Q, vQ - mQ^2)
+		push!(var_Q, vQ)
 		#= # MPO store 
 		if t % 1000 == 1
 			name_string = string(split(split(@__FILE__, ".")[end-1], string('\\'))[end], "_$t.h5")
