@@ -117,7 +117,7 @@ let
 	@show file_name_txt_v
 
 	# Define parameters for simulation
-	cut = -11  # Cutoff for singular values
+	cut = -12  # Cutoff for singular values
 	cutoff = 10.0^cut
 	maxdim = 100
 	tau = 0.001  # Time step duration
@@ -125,13 +125,13 @@ let
 	nt = 10000  # Number of time steps
 	ttotal = nt * tau  # Total time evolution
 
-	N_chain = 190  # Number of chain sites for a single chain-transformed environment
+	N_chain = 180  # Number of chain sites for a single chain-transformed environment
 	tot_chain = 2 * N_chain + 1
 	S_pos = N_chain + 1
 
 	println(S_pos)
 
-	n1_bsn_dim = 15
+	n1_bsn_dim = 14
 	b_dim_real = [n1_bsn_dim - round(Int64, (n1_bsn_dim - 1.6) * (i - 1) / (N_chain - 1)) for i in 1:N_chain]  # Dimension of chain sites
 	b_dim_tilde = [Int(n1_bsn_dim - 5 - round(Int64, (n1_bsn_dim - 5 - 1.6) * (i - 1) / (N_chain - 1))) for i in 1:N_chain]
 	boson_dim = append!(reverse(b_dim_tilde), [0], b_dim_real)
@@ -219,7 +219,7 @@ let
 	for t in 1:nt
 		U_ρ_Ud = normalize(apply(evol, U_ρ_Ud; cutoff, maxdim, apply_dag = true))
 		#U_ρ_Ud = add(0.5 * swapprime(dag(U_ρ_Ud), 0 => 1), 0.5 * U_ρ_Ud; maxdim = 2 * maxdim)
-		U_ρ_Ud = ITensors.truncate(ITensors.truncate(U_ρ_Ud; maxdim = 10, site_range = (1:(Int(floor(3 * N_chain / 4))))); maxdim = 20, site_range = (tot_chain:tot_chain-(Int(floor((3 * N_chain / 4))))))
+		#U_ρ_Ud = ITensors.truncate(ITensors.truncate(U_ρ_Ud; maxdim = 10, site_range = (1:(Int(floor(3 * N_chain / 4))))); maxdim = 20, site_range = (tot_chain:tot_chain-(Int(floor((3 * N_chain / 4))))))
 		orthogonalize!(U_ρ_Ud, S_pos)
 		if t % jump == 1
 			U_ρ_Ud /= tr(U_ρ_Ud)
@@ -233,13 +233,7 @@ let
 			push!(mean_Q, mQ)
 			push!(var_Q, vQ - mQ^2)
 		end
-		# MPO store 
-		if t % 1000 == 1
-			name_string = string(split(split(@__FILE__, ".")[end-1], string('\\'))[end], "_$t.h5")
-			fw = h5open("$name_string", "w")
-			[write(fw, "ρ$i", U_ρ_Ud[i]) for i ∈ 1:eachindex(U_ρ_Ud)[end]]
-            close(fw)
-		end
+		
 
 		@show t * tau
 		@show maxlinkdim(U_ρ_Ud)
