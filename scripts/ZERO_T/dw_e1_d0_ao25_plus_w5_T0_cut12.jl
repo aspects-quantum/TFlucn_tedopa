@@ -77,7 +77,7 @@ end
 
 
 # Method definitions must be at the top level, not inside functions
-ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = [1 0; 0 0]  # Adjusted normalization of the spin state
+ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = [1.0 1.0; 1.0 1.0] ./ 2  # Adjusted normalization of the spin state
 
 ITensors.op(::OpName"0", ::SiteType"Qudit", d::Int) = 1.0I[1:d, 1] * 1.0I[1:d, 1]'
 ITensors.op(::OpName"Idd", ::SiteType"Qudit", d::Int) = (1 / d) * Matrix(1.0I, d, d)
