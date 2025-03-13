@@ -116,7 +116,7 @@ let
 	@show file_name_txt_v
 
 	# Define parameters for simulation
-	cut = -11  # Cutoff for singular values
+	cut = -12  # Cutoff for singular values
 	cutoff = 10.0^cut
 	maxdim = 80
 	tau = 0.001  # Time step duration
@@ -124,7 +124,7 @@ let
 	nt = 10000  # Number of time steps
 	ttotal = nt * tau  # Total time evolution
 
-	N_chain = 10  # Number of chain sites for a single chain-transformed environment
+	N_chain = 170  # Number of chain sites for a single chain-transformed environment
 	tot_chain = 2 * N_chain + 1
 	S_pos = N_chain + 1
 
