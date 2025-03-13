@@ -77,8 +77,8 @@ function dw_unit_gates(ω_0, Ω, c_01, c_02, ab1, ab2, tau, s_total)
 				 c_01 * op("Sx", s_total[j]) * op("Adag", s_total[j+1])
 			Gj = exp(-im * (tau / 2) * hj)
 			push!(gates, Gj)
-			hj = (-c_02) * op("Sx", s_total[j]) * op("A", s_total[j-1]) +
-				 (-c_02) * op("Sx", s_total[j]) * op("Adag", s_total[j-1])
+			hj = (c_02) * op("Sx", s_total[j]) * op("A", s_total[j-1]) +
+				 (c_02) * op("Sx", s_total[j]) * op("Adag", s_total[j-1])
 			Gj = exp(-im * (tau / 2) * hj)
 			push!(gates, Gj)
 
@@ -116,12 +116,12 @@ let
 	@show file_name_txt_v
 
 	# Define parameters for simulation
-	cut = -12  # Cutoff for singular values
+	cut = -13  # Cutoff for singular values
 	cutoff = 10.0^cut
-	maxdim = 80
-	tau = 0.001  # Time step duration
-	jump = 20
-	nt = 10000  # Number of time steps
+	maxdim = 90
+	tau = 0.002  # Time step duration
+	jump = 10
+	nt = 5000  # Number of time steps
 	ttotal = nt * tau  # Total time evolution
 
 	N_chain = 180  # Number of chain sites for a single chain-transformed environment
@@ -130,9 +130,9 @@ let
 
 	println(S_pos)
 
-	n1_bsn_dim = 12
-	b_dim_real = [n1_bsn_dim - round(Int64, (n1_bsn_dim - 1.6) * (i - 1) / (N_chain - 1)) for i in 1:N_chain]  # Dimension of chain sites
-	b_dim_tilde = [Int(n1_bsn_dim - 4 - round(Int64, (n1_bsn_dim - 4 - 1.6) * (i - 1) / (N_chain - 1))) for i in 1:N_chain]
+	n1_bsn_dim = 9  # Dimension of chain sites
+	b_dim_real = [n1_bsn_dim - round(Int64, (n1_bsn_dim - 3.6) * (i - 1) / (N_chain - 1)) for i in 1:N_chain]  # Dimension of chain sites
+	b_dim_tilde = [Int(n1_bsn_dim - 2 - round(Int64, (n1_bsn_dim - 2 - 3.6) * (i - 1) / (N_chain - 1))) for i in 1:N_chain]
 	boson_dim = append!(reverse(b_dim_tilde), [0], b_dim_real)
 
 	s_total = [(n == S_pos) ? Index(2, "S=1/2") : Index(boson_dim[n], "Qudit") for n in 1:tot_chain]
@@ -199,8 +199,17 @@ let
 
 	# Time evolution of density matrix
 	U_ρ_Ud = ρ
-	H_U_ρ_Ud = apply(heat_op, U_ρ_Ud; cutoff = 0.01 * cutoff)
-	H_H_U_ρ_Ud = apply(heat_op, H_U_ρ_Ud; cutoff = 0.01 * cutoff)
+#= 
+    # use the following code to read the MPO density matrix from a file
+	name_string = string(split(split(@__FILE__, ".")[end-1], string('\\'))[end], "_1001", ".h5")
+	fr = h5open(name_string, "r")
+	U_ρ_Ud = MPO(s_total)
+	[U_ρ_Ud[i] = read(fr, "ρ$i", ITensor) for i ∈ 1:eachindex(U_ρ_Ud)[end]]
+    close(fr)     =#
+
+
+	H_U_ρ_Ud = apply(heat_op, U_ρ_Ud; cutoff = 0.1 * cutoff)
+	H_H_U_ρ_Ud = apply(heat_op, H_U_ρ_Ud; cutoff = 0.1 * cutoff)
 	@show mQ = real(tr(H_U_ρ_Ud))
 	@show vQ = real(tr(H_H_U_ρ_Ud))
 	push!(mean_Q, mQ)
@@ -210,23 +219,17 @@ let
 	write_for_loop(file_name_txt_m, string(2), string(mQ))
 	write_for_loop(file_name_txt_v, string(2), string(vQ - mQ^2))
 
-    # use the following code to read the MPO density matrix from a file
-	#= name_string = string(split(split(@__FILE__, ".")[end-1], string('\\'))[end], "_1", ".h5")
-	fr = h5open(name_string, "r")
-	readMPO = MPO(s_total)
-	[readMPO[i] = read(fr, "ρ$i", ITensor) for i ∈ 1:eachindex(readMPO)[end]]
-    close(fr) =#    
 
 	for t in 1:nt
 		U_ρ_Ud = normalize(apply(evol, U_ρ_Ud; cutoff, maxdim, apply_dag = true))
 		#U_ρ_Ud = add(0.5 * swapprime(dag(U_ρ_Ud), 0 => 1), 0.5 * U_ρ_Ud; maxdim = 2 * maxdim)
-		U_ρ_Ud = ITensors.truncate(ITensors.truncate(U_ρ_Ud; maxdim = 10, site_range = (1:(Int(floor(3 * N_chain / 4))))); maxdim = 20, site_range = (tot_chain:tot_chain-(Int(floor((3 * N_chain / 4))))))
+		U_ρ_Ud = ITensors.truncate(ITensors.truncate(U_ρ_Ud; maxdim = 5, site_range = (1:(Int(floor(4 * N_chain / 5))))); maxdim = 10, site_range = (tot_chain:tot_chain-(Int(floor((4 * N_chain / 5))))))
 		orthogonalize!(U_ρ_Ud, S_pos)
 		if t % jump == 1
 			U_ρ_Ud /= tr(U_ρ_Ud)
 			normalize!(U_ρ_Ud)
-			H_U_ρ_Ud = apply(heat_op, U_ρ_Ud; cutoff = 0.01 * cutoff)
-			H_H_U_ρ_Ud = apply(heat_op, H_U_ρ_Ud; cutoff = 0.01 * cutoff)
+			H_U_ρ_Ud = apply(heat_op, U_ρ_Ud; cutoff = 0.1 * cutoff)
+			H_H_U_ρ_Ud = apply(heat_op, H_U_ρ_Ud; cutoff = 0.1 * cutoff)
 			@show mQ = real(tr(H_U_ρ_Ud))
 			@show vQ = real(tr(H_H_U_ρ_Ud))
 			write_for_loop(file_name_txt_m, string(t + 1), string(mQ))
@@ -234,13 +237,13 @@ let
 			push!(mean_Q, mQ)
 			push!(var_Q, vQ - mQ^2)
 		end
-		# MPO store 
+		#= # MPO store 
 		if t % 1000 == 1
 			name_string = string(split(split(@__FILE__, ".")[end-1], string('\\'))[end], "_$t.h5")
 			fw = h5open("$name_string", "w")
 			[write(fw, "ρ$i", U_ρ_Ud[i]) for i ∈ 1:eachindex(U_ρ_Ud)[end]]
             close(fw)
-		end
+		end =#
 		@show t * tau
 		@show maxlinkdim(U_ρ_Ud)
 	end
