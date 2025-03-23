@@ -633,18 +633,24 @@ time_steps = collect(0:151) * 10 * tau * ω_C
 xticks1 = range(2, stop = 8, length = 2)
 xticks2 = range(2, stop = 8, length = 2)
 xticks3 = range(5, stop = maximum(time_steps[end-1]), length = 3)
+xticks3sub = range(10, stop = maximum(time_steps[end-1]), length = 2)
+
 yticks1 = range(0, stop = 6, length = 3)
 yticks2 = range(0, stop = 30, length = 3)
-yticks3 = range(4, stop = 7, length = 3)
+yticks3 = range(4, stop = 10, length = 4)
+yticks3sub = range(4, stop = 5, length = 2)
 
 #xtick_labels1 = [string(round(x, digits = 1)) for x in xticks1]
     xtick_labels1 = [" " for x in xticks1]
 
-xtick_labels2 = [string(round(x, digits = 1)) for x in xticks2]
-xtick_labels3 = [string(round(x, digits = 1)) for x in xticks3]
-ytick_labels1 = [string(round(y, digits = 1)) for y in yticks1]
-ytick_labels2 = [string(round(y, digits = 1)) for y in yticks2]
-ytick_labels3 = [string(round(y, digits = 1)) for y in yticks3]
+xtick_labels2 = [string(Int(round(x, digits = 1))) for x in xticks2]
+xtick_labels3 = [string(Int(round(x, digits = 1))) for x in xticks3]
+xtick_labels3sub = [string(Int(round(x, digits = 1))) for x in xticks3sub]
+ytick_labels1 = [string(Int(round(y, digits = 1))) for y in yticks1]
+ytick_labels2 = [string(Int(round(y, digits = 1))) for y in yticks2]
+ytick_labels3 = [string(Int(round(y, digits = 1))) for y in yticks3]
+ytick_labels3sub = [string(Int(round(y, digits = 1))) for y in yticks3sub]
+
 
 # Plot
 p1 = plot(time_steps, fmQ1.(time_steps), color = :lightblue, seriesalpha = 1, linewidth = 2, label = false)
@@ -667,7 +673,7 @@ vline!([xlims(p1)[2]], lc = :black, lw = 2, label = false)
 hline!([ylims(p1)[2]], lc = :black, lw = 2, label = false)
 plot!(grid = false)
 plot!(bottom_margin = -8mm)
-annotate!(9, 4.7, text("(a)", 20, :black, :right))
+annotate!(9.5, 4.7, text("(a)", 17, :black, :right))
 ticks_length!(tl=.03)
 
 
@@ -691,7 +697,7 @@ vline!([xlims(p2)[2]], lc = :black, lw = 2, label = false)
 hline!([ylims(p2)[2]], lc = :black, lw = 2, label = false)
 plot!(grid = false)
 plot!(legend = false)
-annotate!(9, 22, text("(b)", 20, :black, :right))
+annotate!(9.5, 21, text("(b)", 17, :black, :right))
 ticks_length!(tl=.03)
 plot!(xaxis = L"tω_C")
 
@@ -708,16 +714,40 @@ scatter!(time_steps[8:6:length(vQ1_T)], vQ1_T[8:6:end] ./ mQ1_T[8:6:end], marker
 scatter!(time_steps[8:6:length(vQ2_T)], vQ2_T[8:6:end] ./ mQ2_T[8:6:end], markersize = 4, markerstrokewidth = 0.5, color = :brown)
 plot!(widen = false)
 #plot!(yaxis = L"F")
-ylims!(3.5, 6)  
-xlims!(2, 16)  
+ylims!(3.5, 11)  
+xlims!(0, 16)  
 vline!([xlims(p3)[1]], lc = :black, lw = 2, label = false)
 hline!([ylims(p3)[2]], lc = :black, lw = 2, label = false)
 plot!(grid = false, ymirror = true)
 plot!(legend = false)
-annotate!(19.7, 4.7, text(L"F", 24, :black, :right))
+annotate!(19.5, 7, text(L"F", 24, :black, :right))
 ticks_length!(tl=.02)
-annotate!(14.5, 5.8, text("(c)", 20, :black, :right))
+annotate!(15, 10.5, text("(c)", 17, :black, :right))
 plot!(xaxis = L"tω_C")
+
+
+plot!(p3, inset=bbox(0.3,0.01,0.42, 0.6), subplot=2)
+
+plot!(p3[2], time_steps[50:end], fvQ1.(time_steps[50:end])./fmQ1.(time_steps[50:end]), color = :lightblue, seriesalpha = 1, linewidth = 2, label = false)
+plot!(p3[2], time_steps[50:end], fvQ2.(time_steps[50:end])./fmQ2.(time_steps[50:end]), color = :teal, seriesalpha = 1, linewidth = 2, label = false)
+plot!(p3[2], time_steps[50:end], fvQ1T.(time_steps[50:end])./fmQ1T.(time_steps[50:end]), color = :lightcoral, seriesalpha = 1, linewidth = 2, label = false)
+plot!(p3[2], time_steps[50:end], fvQ2T.(time_steps[50:end])./fmQ2T.(time_steps[50:end]), color = :brown, seriesalpha = 1, linewidth = 2, label = false)
+scatter!(p3[2], time_steps[50:6:length(vQ1)], vQ1[50:6:end] ./ mQ1[50:6:end], color = :lightblue, xticks = (xticks3sub, xtick_labels3sub), yticks = (yticks3sub, ytick_labels3sub), xtickfont = font(12), ytickfont = font(12),
+	xguidefontsize = 10, yguidefontsize = 15, seriesalpha = 1, xaxis = "", markersize = 4, markerstrokewidth = 0.5) #, label = L"\  (1, 1.5)")
+scatter!(p3[2], time_steps[50:6:length(vQ2)], vQ2[50:6:end] ./ mQ2[50:6:end], markersize = 4, markerstrokewidth = 0.5, color = :teal) #, label = L"\ (0.1, 0.75)")
+scatter!(p3[2], time_steps[50:6:length(vQ1_T)], vQ1_T[50:6:end] ./ mQ1_T[50:6:end], markersize = 4, markerstrokewidth = 0.5, color = :lightcoral)
+scatter!(p3[2], time_steps[50:6:length(vQ2_T)], vQ2_T[50:6:end] ./ mQ2_T[50:6:end], markersize = 4, markerstrokewidth = 0.5, color = :brown)
+ylims!(p3[2], 3.8, 5.3)  
+xlims!(p3[2], 7, 15)  
+#= vline!([xlims(p3)[1]], lc = :black, lw = 2, label = false)
+hline!([ylims(p3)[2]], lc = :black, lw = 2, label = false) =#
+plot!(p3[2], grid = false)
+plot!(p3[2], legend = false, aspect_ratio = 5., framestyle = :box)	
+#annotate!(19.7, 4.7, text(L"F", 24, :black, :right))
+#annotate!(14.5, 5.8, text("(c)", 20, :black, :right))
+#plot!(p3[2], xaxis = L"tω_C")
+#plot!(p3[2], xaxis = " ")
+
 
 
 custom_layout = @layout [[a{0.5h}; b{1.35w}] c{0.6w}]

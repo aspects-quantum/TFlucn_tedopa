@@ -129,9 +129,9 @@ let
 
 	println(S_pos_r)
 
-	n1_bsn_dim = 10  # Dimension of chain sites
+	n1_bsn_dim = 7  # Dimension of chain sites
 	b_dim_real = [n1_bsn_dim - round(Int64, (n1_bsn_dim - 1.6) * (i - 1) / (N_chain - 1)) for i in 1:N_chain]  # Dimension of chain sites
-	b_dim_tilde = [Int(n1_bsn_dim - 5 - round(Int64, (n1_bsn_dim - 5 - 1.6) * (i - 1) / (N_chain - 1))) for i in 1:N_chain]
+	b_dim_tilde = [Int(n1_bsn_dim - 3 - round(Int64, (n1_bsn_dim - 3 - 1.6) * (i - 1) / (N_chain - 1))) for i in 1:N_chain]
 	boson_dim = append!(reverse(b_dim_tilde), [0, 0], b_dim_real)
 
 	s_total = [(n == S_pos_r) || (n == S_pos_t) ? Index(2, "S=1/2") : Index(boson_dim[n], "Qudit") for n in 1:tot_chain]
@@ -146,11 +146,11 @@ let
 	model = (ω_0 == 1) ? "local" : "tunnel"
 	model = (Ω == 1) ? "tunnel" : "local"
 
-	T = 0.1  # Temperature of bath
+	T = 0.1  # Temperature of bath 
 	β = 1 / T
 
 	t_list = collect(0:1:nt) * tau
-	α = 1.25
+	α = 0.25
 	mean_Q = Float64[]
 
 	support_cutoff = 700
@@ -195,7 +195,11 @@ let
 	mean_Q = Float64[]
 	var_Q = Float64[]
 
-	ψ = normalize(expand(ψ, evol; alg="global_krylov", krylovdim=1000, cutoff=10^-12))
+	ψ = normalize(expand(ψ, evol; alg="global_krylov", krylovdim=800, cutoff=10^-12))
+
+	p = plot([S_pos_t, S_pos_r, S_pos_r, S_pos_t, S_pos_t], [0, 0, maxlinkdim(ψ), maxlinkdim(ψ), 0], linewidth = 0, color = :pink, seriestype = :shape, xlabel = L"sites", ylabel = L"\chi", legend = false)
+	p = plot!(linkdims(ψ))
+	display("image/png", p)
 
 	# Time evolution of state
 	U_ψ = ψ
@@ -207,13 +211,6 @@ let
 	write_for_loop(file_name_txt_v, string(1), "$(model) boson: T = $T, alpha = $α, N_chain = $N_chain, maxdim = $maxdim, cutoff = $cut, tau = $tau, jump = $jump, boson_dim = $n1_bsn_dim, omega = $ω_C")
 	write_for_loop(file_name_txt_m, string(2), string(mQ))
 	write_for_loop(file_name_txt_v, string(2), string(vQ))
-
-	# use the following code to read the MPO density matrix from a file
-	#= name_string = string(split(split(@__FILE__, ".")[end-1], string('\\'))[end], "_1", ".h5")
-	fr = h5open(name_string, "r")
-	readMPO = MPO(s_total)
-	[readMPO[i] = read(fr, "ρ$i", ITensor) for i ∈ 1:eachindex(readMPO)[end]]
-	close(fr) =#
 
 	for t in 1:nt
 		U_ψ = tdvp(evol, -1im * tau, U_ψ; nsteps = jump, nsite = 2, normalize = true, cutoff, maxdim)

@@ -696,7 +696,6 @@ ticks_length!(tl=.03)
 plot!(xaxis = L"tω_C")
 
 
-
 p3 = plot(time_steps[10:end], fvQ1.(time_steps[10:end])./fmQ1.(time_steps[10:end]), color = :lightblue, seriesalpha = 1, linewidth = 2, label = false)
 plot!(time_steps[10:end], fvQ2.(time_steps[10:end])./fmQ2.(time_steps[10:end]), color = :teal, seriesalpha = 1, linewidth = 2, label = false)
 plot!(time_steps[10:end], fvQ1T.(time_steps[10:end])./fmQ1T.(time_steps[10:end]), color = :lightcoral, seriesalpha = 1, linewidth = 2, label = false)
@@ -708,8 +707,8 @@ scatter!(time_steps[8:6:length(vQ1_T)], vQ1_T[8:6:end] ./ mQ1_T[8:6:end], marker
 scatter!(time_steps[8:6:length(vQ2_T)], vQ2_T[8:6:end] ./ mQ2_T[8:6:end], markersize = 4, markerstrokewidth = 0.5, color = :brown)
 plot!(widen = false)
 #plot!(yaxis = L"F")
-ylims!(3.5, 6)  
-xlims!(2, 16)  
+ylims!(3.5, 10)  
+xlims!(0.2, 16)  
 vline!([xlims(p3)[1]], lc = :black, lw = 2, label = false)
 hline!([ylims(p3)[2]], lc = :black, lw = 2, label = false)
 plot!(grid = false, ymirror = true)
@@ -717,10 +716,33 @@ plot!(legend = false)
 annotate!(19.7, 4.7, text(L"F", 24, :black, :right))
 ticks_length!(tl=.02)
 annotate!(14.5, 5.8, text("(c)", 20, :black, :right))
-plot!(xaxis = L"tω_C")
+#= 
+plot!(p3, inset=bbox(0.15,0.45,0.35, 0.4), subplot=2)
 
+plot!(p3[2], time_steps[10:end], fvQ1.(time_steps[10:end])./fmQ1.(time_steps[10:end]), color = :lightblue, seriesalpha = 1, linewidth = 2, label = false)
+plot!(p3[2], time_steps[10:end], fvQ2.(time_steps[10:end])./fmQ2.(time_steps[10:end]), color = :teal, seriesalpha = 1, linewidth = 2, label = false)
+plot!(p3[2], time_steps[10:end], fvQ1T.(time_steps[10:end])./fmQ1T.(time_steps[10:end]), color = :lightcoral, seriesalpha = 1, linewidth = 2, label = false)
+plot!(p3[2], time_steps[10:end], fvQ2T.(time_steps[10:end])./fmQ2T.(time_steps[10:end]), color = :brown, seriesalpha = 1, linewidth = 2, label = false)
+scatter!(time_steps[8:6:length(vQ1)], vQ1[8:6:end] ./ mQ1[8:6:end], color = :lightblue, xticks = (xticks3, xtick_labels3), yticks = (yticks3, ytick_labels3), xtickfont = font(14), ytickfont = font(14),
+	xguidefontsize = 24, yguidefontsize = 22, seriesalpha = 1, xaxis = "", markersize = 4, markerstrokewidth = 0.5) #, label = L"\  (1, 1.5)")
+scatter!(p3[2], time_steps[8:6:length(vQ2)], vQ2[8:6:end] ./ mQ2[8:6:end], markersize = 4, markerstrokewidth = 0.5, color = :teal) #, label = L"\ (0.1, 0.75)")
+scatter!(p3[2], time_steps[8:6:length(vQ1_T)], vQ1_T[8:6:end] ./ mQ1_T[8:6:end], markersize = 4, markerstrokewidth = 0.5, color = :lightcoral)
+scatter!(p3[2], time_steps[8:6:length(vQ2_T)], vQ2_T[8:6:end] ./ mQ2_T[8:6:end], markersize = 4, markerstrokewidth = 0.5, color = :brown)
+plot!(widen = false)
+#= #plot!(yaxis = L"F")
+ylims!(3.5, 6)  
+xlims!(2, 16)  
+vline!([xlims(p3)[1]], lc = :black, lw = 2, label = false)
+hline!([ylims(p3)[2]], lc = :black, lw = 2, label = false)
+plot!(grid = false, ymirror = true)
+plot!(legend = false)
+annotate!(19.7, 4.7, text(L"F", 24, :black, :right))
+ticks_length!(tl=.02) =#
+#annotate!(14.5, 5.8, text("(c)", 20, :black, :right))
+plot!(p3[2], xaxis = L"tω_C")
+ =#
 
-custom_layout = @layout [[a{0.5h}; b{1.35w}] c{0.6w}]
+custom_layout = @layout [[a{0.5h}; b] [c]] 
 p = plot(p1, p2, p3, layout = custom_layout, size = (600, 400), left_margin = 5mm, right_margin = 7mm)
 
 
