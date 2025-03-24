@@ -5,72 +5,52 @@ ITensors.disable_warn_order()
 
 ##########################################################################
 
-function HB(ab1, ab2, s_total)
+function HB(ab1, s_total)
 
-	tot_chain = length(s_total)
-	S_pos_t = Int(tot_chain / 2)
-	S_pos_r = S_pos_t + 1
+	#s_total = [(n == 1) ? Index(2, "S=1/2") : Index(boson_dim, "Qudit") for n = 1:tot_chain]
 
-	ω_n_REAL = ab1[1:S_pos_t-1, 1]
-	ω_n_TILD = ab2[1:S_pos_t-1, 1]
-	ω_n_total = append!(reverse(ω_n_TILD), [0, 0], ω_n_REAL)
-	t_n_REAL = sqrt.(ab1[2:S_pos_t, 2])
-	t_n_TILD = sqrt.(ab2[2:S_pos_t, 2])
-	t_n_total = append!(reverse(t_n_TILD), [0, 0], t_n_REAL)
+	tot_chain = lastindex(s_total)
+	N_chain = tot_chain - 2
+	S_pos_t = 1
+	S_pos_r = 2
+
+	ω_n_REAL = ab1[1:N_chain, 1]
+	ω_n_total = append!([0., 0.], ω_n_REAL)
+	t_n_REAL = sqrt.(ab1[2:N_chain+1, 2])
+	t_n_total = append!([0., 0.], t_n_REAL)
 
 	H = OpSum()
 
-	for j in 2:tot_chain-1
+	for j in 3:tot_chain-1
+		ω_n = ω_n_total[j]
+		t_n = t_n_total[j]
 
-		if j < S_pos_t
-			ω_n = ω_n_total[j]
-			t_n = t_n_total[j]
-
-			H .+= (-ω_n, "N", j, "Id", j - 1)
-			H .+= (-t_n, "Adag", j, "A", j - 1)
-			H .+= (-t_n, "A", j, "Adag", j - 1)
-
-		elseif (j == S_pos_t) || (j == S_pos_r)
-			continue
-
-		else
-			ω_n = ω_n_total[j]
-			t_n = t_n_total[j]
-
-			H .+= (ω_n, "N", j, "Id", j + 1)
-			H .+= (t_n, "Adag", j, "A", j + 1)
-			H .+= (t_n, "A", j, "Adag", j + 1)
-		end
+		H .+= (ω_n, "N", j, "Id", j + 1)
+		H .+= (t_n, "Adag", j, "A", j + 1)
+		H .+= (t_n, "A", j, "Adag", j + 1)
 	end
 
 	return MPO(H, s_total)
 end
 
 ##########################################################################
-function dw_ham(ω_0, Ω, c_01, c_02, ab1, ab2, s_total)
-	tot_chain = length(s_total)
-	S_pos_t = Int(tot_chain / 2)
-	S_pos_r = S_pos_t + 1
+function dw_ham(ω_0, Ω, c_01, ab1, s_total)
+	tot_chain = lastindex(s_total)
+	N_chain = tot_chain - 2
+	S_pos_t = 1
+	S_pos_r = 2
 
-	ω_n_REAL = ab1[1:S_pos_t-1, 1]
-	ω_n_TILD = ab2[1:S_pos_t-1, 1]
-	ω_n_total = append!(reverse(ω_n_TILD), [0, 0], ω_n_REAL)
-	t_n_REAL = sqrt.(ab1[2:S_pos_t, 2])
-	t_n_TILD = sqrt.(ab2[2:S_pos_t, 2])
-	t_n_total = append!(reverse(t_n_TILD), [0, 0], t_n_REAL)
+	ω_n_REAL = ab1[1:N_chain, 1]
+	ω_n_total = append!([0., 0.], ω_n_REAL)
+	t_n_REAL = sqrt.(ab1[2:N_chain+1, 2])
+	t_n_total = append!([0., 0.], t_n_REAL)
 
 	ham = OpSum()
 
-	for j in 2:tot_chain-1
+	for j in 1:tot_chain-1
 
-		if j < S_pos_t
-			ω_n = ω_n_total[j]
-			t_n = t_n_total[j]
-			ham .+= (-ω_n), "N", j
-			ham .+= (-t_n), "Adag", j, "A", j - 1
-			ham .+= (-t_n), "A", j, "Adag", j - 1
 
-		elseif j == S_pos_t
+		if j == S_pos_t
 			ham .-= ω_0, "Sz", j
 			ham .-= Ω, "Sx", j
 
@@ -79,9 +59,6 @@ function dw_ham(ω_0, Ω, c_01, c_02, ab1, ab2, s_total)
 			ham .+= Ω, "Sx", j
 			ham .+= c_01, "Sx", j, "A", j + 1
 			ham .+= c_01, "Sx", j, "Adag", j + 1
-			ham .+= c_02, "Sx", j, "A", S_pos_t - 1
-			ham .+= c_02, "Sx", j, "Adag", S_pos_t - 1
-
 		else
 			ω_n = ω_n_total[j]
 			t_n = t_n_total[j]
@@ -122,20 +99,17 @@ let
 	nt = 800  # Number of time steps
 	ttotal = nt * tau  # Total time evolution
 
-	N_chain = 120  # Number of chain sites for a single chain-transformed environment
-	tot_chain = 2 * N_chain + 2  # Total number of chain sites
-	S_pos_t = N_chain + 1
-	S_pos_r = N_chain + 2
+	N_chain = 130  # Number of chain sites for a single chain-transformed environment
+	tot_chain = N_chain + 2  # Total number of chain sites
+	S_pos_t = 1
+	S_pos_r = 2
 
-	println(S_pos_r)
-
-	n1_bsn_dim = 7  # Dimension of chain sites
-	b_dim_real = [n1_bsn_dim - round(Int64, (n1_bsn_dim - 1.6) * (i - 1) / (N_chain - 1)) for i in 1:N_chain]  # Dimension of chain sites
-	b_dim_tilde = [Int(n1_bsn_dim - 3 - round(Int64, (n1_bsn_dim - 3 - 1.6) * (i - 1) / (N_chain - 1))) for i in 1:N_chain]
-	boson_dim = append!(reverse(b_dim_tilde), [0, 0], b_dim_real)
+	n1_bsn_dim = 9  # Dimension of chain sites
+	b_dim = [n1_bsn_dim - round(Int64, (n1_bsn_dim - 1.6) * (i - 1) / (N_chain - 1)) for i in 1:N_chain]  # Dimension of chain sites
+	boson_dim = append!([0, 0], b_dim)
 
 	s_total = [(n == S_pos_r) || (n == S_pos_t) ? Index(2, "S=1/2") : Index(boson_dim[n], "Qudit") for n in 1:tot_chain]
-	
+
 	state = [(n == S_pos_r) || (n == S_pos_t) ? "+" : "0" for n in 1:tot_chain]
 	ψ = MPS(s_total, state)
 
@@ -146,11 +120,11 @@ let
 	model = (ω_0 == 1) ? "local" : "tunnel"
 	model = (Ω == 1) ? "tunnel" : "local"
 
-	T = 0.1  # Temperature of bath 
+	T = 0.  # Temperature of bath 
 	β = 1 / T
 
 	t_list = collect(0:1:nt) * tau
-	α = 0.25
+	α = 1.25
 	mean_Q = Float64[]
 
 	support_cutoff = 700
@@ -163,30 +137,23 @@ let
 
 	# Define functions for the weight functions
 	n(ω) = 1 / (exp(β * ω) - 1)
-	w_fn1(k) = (2 * α * k * exp(-k / ω_C)) * (1 + n(k))
-	w_fn2(k) = (2 * α * k * exp(-k / ω_C)) * n(k)
+	w_fn1(k) = (2 * α * k * exp(-k / ω_C))
 
 	# Calculate recurrence coefficients
 	η01 = quadgk(w_fn1, 0, support_cutoff)
 	c_01 = sqrt(Complex(η01[1]))
-	η02 = quadgk(w_fn2, 0, support_cutoff)
-	c_02 = sqrt(Complex(η02[1]))
 
 	if N_chain >= N_rec
 		ab1[1:N_rec, 1:2] = recur_coeff(w_fn1, supp, N_rec, Nquad)
-		ab2[1:N_rec, 1:2] = recur_coeff(w_fn2, supp, N_rec, Nquad)
 		a1_100, b1_100 = ab1[N_rec, 1], ab1[N_rec, 2]
-		a2_100, b2_100 = ab2[N_rec, 1], ab2[N_rec, 2]
 		ab1[N_rec+1:N_coeff, 1:2] .= repeat([a1_100 b1_100], N_coeff - N_rec, 1)
-		ab2[N_rec+1:N_coeff, 1:2] .= repeat([a2_100 b2_100], N_coeff - N_rec, 1)
 	else
 		ab1 .= recur_coeff(w_fn1, supp, N_coeff, Nquad)
-		ab2 .= recur_coeff(w_fn2, supp, N_coeff, Nquad)
 	end
 
-	heat_op = HB(ab1, ab2, s_total)
+	heat_op = HB(ab1, s_total)
 	heat_op_2 = apply(heat_op, heat_op)
-	evol = dw_ham(ω_0, Ω, c_01, c_02, ab1, ab2, s_total)
+	evol = dw_ham(ω_0, Ω, c_01, ab1, s_total)
 
 	# Initialize characteristic function vector
 	char_fn = Vector{ComplexF64}()
@@ -195,8 +162,10 @@ let
 	mean_Q = Float64[]
 	var_Q = Float64[]
 
-	ψ = normalize(expand(ψ, evol; alg="global_krylov", krylovdim=800, cutoff=10^-12))
+	ψ = normalize(expand(ψ, evol; alg = "global_krylov", krylovdim = 1000, cutoff = 10^-12))
 
+	p = plot(linkdims(ψ))
+	display("image/png", p)
 
 	# Time evolution of state
 	U_ψ = ψ
@@ -209,6 +178,13 @@ let
 	write_for_loop(file_name_txt_m, string(2), string(mQ))
 	write_for_loop(file_name_txt_v, string(2), string(vQ))
 
+	# use the following code to read the MPO density matrix from a file
+	#= name_string = string(split(split(@__FILE__, ".")[end-1], string('\\'))[end], "_1", ".h5")
+	fr = h5open(name_string, "r")
+	readMPO = MPO(s_total)
+	[readMPO[i] = read(fr, "ρ$i", ITensor) for i ∈ 1:eachindex(readMPO)[end]]
+	close(fr) =#
+
 	for t in 1:nt
 		U_ψ = tdvp(evol, -1im * tau, U_ψ; nsteps = jump, nsite = 2, normalize = true, cutoff, maxdim)
 		#U_ρ_Ud = ITensors.truncate(ITensors.truncate(U_ρ_Ud; maxdim = 10, site_range = (1:(Int(floor(3 * N_chain / 4))))); maxdim = 20, site_range = (tot_chain:tot_chain-(Int(floor((3 * N_chain / 4))))))
@@ -219,7 +195,7 @@ let
 		write_for_loop(file_name_txt_v, string(t + 1), string(vQ))
 		push!(mean_Q, mQ)
 		push!(var_Q, vQ)
-		
+
 		@show t * tau
 		@show maxlinkdim(U_ψ)
 	end
