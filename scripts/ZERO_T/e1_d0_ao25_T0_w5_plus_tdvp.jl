@@ -95,16 +95,16 @@ let
 	cutoff = 10.0^cut
 	maxdim = 100
 	tau = 0.02  # Time step duration
-	jump = 5  # Number of time steps for each evolution
+	jump = 10  # Number of time steps for each evolution
 	nt = 800  # Number of time steps
 	ttotal = nt * tau  # Total time evolution
 
-	N_chain = 30  # Number of chain sites for a single chain-transformed environment
+	N_chain = 130  # Number of chain sites for a single chain-transformed environment
 	tot_chain = N_chain + 2  # Total number of chain sites
 	S_pos_t = 1
 	S_pos_r = 2
 
-	n1_bsn_dim = 7  # Dimension of chain sites
+	n1_bsn_dim = 8  # Dimension of chain sites
 	b_dim = [n1_bsn_dim - round(Int64, (n1_bsn_dim - 1.6) * (i - 1) / (N_chain - 1)) for i in 1:N_chain]  # Dimension of chain sites
 	boson_dim = append!([0, 0], b_dim)
 
@@ -131,9 +131,8 @@ let
 	supp = (0, support_cutoff)  # Support of the weight function
 	Nquad = 10^7  # Reduced number of quadrature points for speed
 	N_coeff = N_chain + 1
-	N_rec = 92
+	N_rec = 95
 	ab1 = Matrix{Float64}(undef, N_coeff, 2)
-	ab2 = Matrix{Float64}(undef, N_coeff, 2)
 
 	# Define functions for the weight functions
 	n(ω) = 1 / (exp(β * ω) - 1)
