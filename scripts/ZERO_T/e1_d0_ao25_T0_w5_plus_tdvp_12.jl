@@ -161,10 +161,7 @@ let
 	mean_Q = Float64[]
 	var_Q = Float64[]
 
-	ψ = normalize(expand(ψ, evol; alg = "global_krylov", krylovdim = 1000, cutoff = 10^-12))
-
-	p = plot(linkdims(ψ))
-	display("image/png", p)
+	#ψ = normalize(expand(ψ, evol; alg = "global_krylov", krylovdim = 1000, cutoff = 10^-12))
 
 	# Time evolution of state
 	U_ψ = ψ
@@ -184,7 +181,7 @@ let
 		if maxlinkdim(U_ψ) >= maxdim
 			U_ψ = tdvp(evol, -1im*tau, U_ψ; nsteps=10, nsite=1, normalize=true, cutoff=1e-12)
 		else
-			U_ψ = expand(U_ψ, evol; alg="global_krylov", krylovdim=5, cutoff=10^-12)
+			U_ψ = expand(U_ψ, evol; alg="global_krylov", krylovdim=10, cutoff=10^-12)
 			U_ψ = tdvp(evol, -1im*tau/9, U_ψ; nsteps=2, nsite=2, normalize=true, cutoff=1e-12)
 			U_ψ = tdvp(evol, -1im*tau/3, U_ψ; nsteps=2, nsite=1, normalize=true, cutoff=1e-12)
 			U_ψ = tdvp(evol, -1im*tau/9, U_ψ; nsteps=2, nsite=2, normalize=true, cutoff=1e-12)
