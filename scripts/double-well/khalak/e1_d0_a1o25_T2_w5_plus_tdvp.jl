@@ -26,9 +26,9 @@ function HB(ab1, ab2, s_total)
 			ω_n = ω_n_total[j]
 			t_n = t_n_total[j]
 
-			H .-= (ω_n, "N", j)
-			H .-= (t_n, "Adag", j, "A", j - 1)
-			H .-= (t_n, "A", j, "Adag", j - 1)
+			H .+= (-ω_n, "N", j, "Id", j - 1)
+			H .+= (-t_n, "Adag", j, "A", j - 1)
+			H .+= (-t_n, "A", j, "Adag", j - 1)
 
 		elseif (j == S_pos_t) || (j == S_pos_r)
 			continue
@@ -37,7 +37,7 @@ function HB(ab1, ab2, s_total)
 			ω_n = ω_n_total[j]
 			t_n = t_n_total[j]
 
-			H .+= (ω_n, "N", j)
+			H .+= (ω_n, "N", j, "Id", j + 1)
 			H .+= (t_n, "Adag", j, "A", j + 1)
 			H .+= (t_n, "A", j, "Adag", j + 1)
 		end
@@ -73,18 +73,14 @@ function dw_ham(ω_0, Ω, c_01, c_02, ab1, ab2, s_total)
 		elseif j == S_pos_t
 			ham .-= ω_0, "Sz", j
 			ham .-= Ω, "Sx", j
-			ham .-= c_01, "Sx", j, "A", j - 1
-			ham .-= c_01, "Sx", j, "Adag", j - 1
-			ham .+= c_02, "Sx", j, "A", S_pos_r + 1
-			ham .+= c_02, "Sx", j, "Adag", S_pos_r + 1
 
 		elseif j == S_pos_r
 			ham .+= ω_0, "Sz", j
 			ham .+= Ω, "Sx", j
 			ham .+= c_01, "Sx", j, "A", j + 1
 			ham .+= c_01, "Sx", j, "Adag", j + 1
-			ham .-= c_02, "Sx", j, "A", S_pos_t - 1
-			ham .-= c_02, "Sx", j, "Adag", S_pos_t - 1
+			ham .+= c_02, "Sx", j, "A", S_pos_t - 1
+			ham .+= c_02, "Sx", j, "Adag", S_pos_t - 1
 
 		else
 			ω_n = ω_n_total[j]
@@ -103,7 +99,7 @@ end
 
 # Method definitions must be at the top level, not inside functions
 ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = [1.0 1.0; 1.0 1.0] ./ 2.0  # Adjusted normalization of the spin state
-ITensors.state(::StateName"+", ::SiteType"S=1/2") = (1 / sqrt(2)) * [1.0; 1.0]  # Density matrix for qudit
+ITensors.state(::StateName"+", ::SiteType"S=1/2") = (1 / sqrt(2)) * [1; 1]  # Density matrix for qudit
 ITensors.op(::OpName"0", ::SiteType"Qudit", d::Int) = 1.0I[1:d, 1] * 1.0I[1:d, 1]'
 ITensors.state(::StateName"0", ::SiteType"Qudit", d::Int) = 1.0I[1:d, 1]
 ITensors.op(::OpName"Idd", ::SiteType"Qudit", d::Int) = (1 / d) * Matrix(1.0I, d, d)
@@ -118,12 +114,12 @@ let
 	@show file_name_txt_v
 
 	# Define parameters for simulation
-	cut = -14  # Cutoff for singular values
+	cut = -13  # Cutoff for singular values
 	cutoff = 10.0^cut
 	maxdim = 100
 	tau = 0.02  # Time step duration
-	jump = 20
-	nt = 1000  # Number of time steps
+	jump = 6  # Number of time steps for each evolution
+	nt = 800  # Number of time steps
 	ttotal = nt * tau  # Total time evolution
 
 	N_chain = 120  # Number of chain sites for a single chain-transformed environment
@@ -133,28 +129,28 @@ let
 
 	println(S_pos_r)
 
-	n1_bsn_dim = 15
+	n1_bsn_dim = 9  # Dimension of chain sites
 	b_dim_real = [n1_bsn_dim - round(Int64, (n1_bsn_dim - 1.6) * (i - 1) / (N_chain - 1)) for i in 1:N_chain]  # Dimension of chain sites
 	b_dim_tilde = [Int(n1_bsn_dim - 5 - round(Int64, (n1_bsn_dim - 5 - 1.6) * (i - 1) / (N_chain - 1))) for i in 1:N_chain]
 	boson_dim = append!(reverse(b_dim_tilde), [0, 0], b_dim_real)
 
 	s_total = [(n == S_pos_r) || (n == S_pos_t) ? Index(2, "S=1/2") : Index(boson_dim[n], "Qudit") for n in 1:tot_chain]
 	
-	state = [(n == S_pos_r) || (n == S_pos_t) ? "0" : "0" for n in 1:tot_chain]
+	state = [(n == S_pos_r) || (n == S_pos_t) ? "+" : "0" for n in 1:tot_chain]
 	ψ = MPS(s_total, state)
 
 	# Bath parameters
 	ω_C = 5  # Bath cutoff
-	ω_0 = 0  # Spin splitting
-	Ω = 1
+	ω_0 = 1  # Spin splitting
+	Ω = 0
 	model = (ω_0 == 1) ? "local" : "tunnel"
 	model = (Ω == 1) ? "tunnel" : "local"
 
-	T = 0.01  # Temperature of bath
+	T = 2.  # Temperature of bath
 	β = 1 / T
 
 	t_list = collect(0:1:nt) * tau
-	α = 0.25
+	α = 1.25
 	mean_Q = Float64[]
 
 	support_cutoff = 700
@@ -187,8 +183,9 @@ let
 		ab1 .= recur_coeff(w_fn1, supp, N_coeff, Nquad)
 		ab2 .= recur_coeff(w_fn2, supp, N_coeff, Nquad)
 	end
-
+#@show ab1
 	heat_op = HB(ab1, ab2, s_total)
+	heat_op_2 = apply(heat_op, heat_op)
 	evol = dw_ham(ω_0, Ω, c_01, c_02, ab1, ab2, s_total)
 
 	# Initialize characteristic function vector
@@ -198,10 +195,10 @@ let
 	mean_Q = Float64[]
 	var_Q = Float64[]
 
+	ψ = normalize(expand(ψ, evol; alg="global_krylov", krylovdim=1000, cutoff=10^-10))
+
 	# Time evolution of state
 	U_ψ = ψ
-	@show inner(U_ψ', U_ψ)
-
 	@show mQ = real(inner(U_ψ', heat_op, U_ψ))
 	@show vQ = real(inner(heat_op, U_ψ, heat_op, U_ψ)) - mQ^2
 	push!(mean_Q, mQ)
@@ -211,26 +208,24 @@ let
 	write_for_loop(file_name_txt_m, string(2), string(mQ))
 	write_for_loop(file_name_txt_v, string(2), string(vQ))
 
+	# use the following code to read the MPO density matrix from a file
+	#= name_string = string(split(split(@__FILE__, ".")[end-1], string('\\'))[end], "_1", ".h5")
+	fr = h5open(name_string, "r")
+	readMPO = MPO(s_total)
+	[readMPO[i] = read(fr, "ρ$i", ITensor) for i ∈ 1:eachindex(readMPO)[end]]
+	close(fr) =#
 
 	for t in 1:nt
-		U_ψ = tdvp(evol, -1im * tau, U_ψ; time_step = -1im * (tau / 2), updater_kwargs=(; tol=1e-8, krylovdim=50), normalize = false, maxdim=100)
+		U_ψ = tdvp(evol, -1im * tau, U_ψ; nsteps = jump, nsite = 2, normalize = true, cutoff, maxdim)
 		#U_ρ_Ud = ITensors.truncate(ITensors.truncate(U_ρ_Ud; maxdim = 10, site_range = (1:(Int(floor(3 * N_chain / 4))))); maxdim = 20, site_range = (tot_chain:tot_chain-(Int(floor((3 * N_chain / 4))))))
 		#orthogonalize!(U_ρ_Ud, S_pos)
-		@show inner(U_ψ', U_ψ)
 		@show mQ = real(inner(U_ψ', heat_op, U_ψ))
 		@show vQ = real(inner(heat_op, U_ψ, heat_op, U_ψ)) - mQ^2
 		write_for_loop(file_name_txt_m, string(t + 1), string(mQ))
 		write_for_loop(file_name_txt_v, string(t + 1), string(vQ))
 		push!(mean_Q, mQ)
 		push!(var_Q, vQ)
-		#= # MPO store 
-		if t % 1000 == 1
-			name_string = string(split(split(@__FILE__, ".")[end-1], string('\\'))[end], "_$t.h5")
-			fw = h5open("$name_string", "w")
-			[write(fw, "ρ$i", U_ρ_Ud[i]) for i ∈ 1:eachindex(U_ρ_Ud)[end]]
-			close(fw)
-		end
-		=#
+		
 		@show t * tau
 		@show maxlinkdim(U_ψ)
 	end

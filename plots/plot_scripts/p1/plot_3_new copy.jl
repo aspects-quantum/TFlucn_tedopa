@@ -1,25 +1,25 @@
-using DrWatson, Plots, LaTeXStrings, QuadGK
-using Plots.PlotMeasures, Colors
+using DrWatson, Plots, LaTeXStrings
+using Plots.PlotMeasures
 
 gr()  # Use GR backend, but you can switch to PyPlot if needed
-#pyplot()
-function ticks_length!(;tl=0.03)
-    p = Plots.current()
-    xticks, yticks = Plots.xticks(p)[1][1], Plots.yticks(p)[1][1]
-    xl, yl = Plots.xlims(p), Plots.ylims(p)
-    x1, y1 = zero(yticks) .+ xl[1], zero(xticks) .+ yl[1]
-    sz = p.attr[:size]
-    r = sz[1]/sz[2]
-    dx, dy = tl*(xl[2] - xl[1]), tl*r*(yl[2] - yl[1])
-    plot!([xticks xticks]', [y1 y1 .+ dy]', c=:black, labels=false)
-    plot!([x1 x1 .+ dx]', [yticks yticks]', c=:black, labels=false, xlims=xl, ylims=yl)
-    return Plots.current()
+function ticks_length!(; tl = 0.02)
+	p = Plots.current()
+	xticks, yticks = Plots.xticks(p)[1][1], Plots.yticks(p)[1][1]
+	xl, yl = Plots.xlims(p), Plots.ylims(p)
+	x1, y1 = zero(yticks) .+ xl[1], zero(xticks) .+ yl[1]
+	sz = p.attr[:size]
+	r = sz[1] / sz[2]
+	dx, dy = tl * (xl[2] - xl[1]), tl * r * (yl[2] - yl[1])
+	plot!([xticks xticks]', [y1 y1 .+ dy]', c = :black, labels = false)
+	plot!([x1 x1 .+ dx]', [yticks yticks]', c = :black, labels = false, xlims = xl, ylims = yl)
+	return Plots.current()
 end
 # Define data
 
 
 T = 0.1
 α = 0.5
+
 
 # T = 1.0, alpha = 1.5, N_chain = 160, maxdim = 80, cutoff = -11, tau = 0.002, jump = 10, boson_dim = 13, omega = 5
 mQ1 = [-1.2250295150933485e-10, 0.0007500588337063434, 0.0896475302875524, 0.31672121848737955, 0.657444843016371, 1.0791427462308694, 1.5478533208036618, 2.0336172890831143, 2.513234938360908, 2.970783805605611, 3.3967334209688835, 3.7864843782528284, 4.138880901143337, 4.454963415882669, 4.737035219680152, 4.9880184112944645, 5.211038300044452, 5.409172692309529, 5.585312890657906, 5.742096661469061, 5.8818854093575945, 6.0067670473095935, 6.118572149775206, 6.218899312500454, 6.309137406428616, 6.3904926080627105, 6.464011359834338, 6.530601650820891, 6.591051941385042, 6.646047791614634, 6.69618632768266, 6.741988753731023, 6.783911100914819, 6.822353435076127, 6.85766714093514, 6.890163767185455, 6.920117518321032, 6.9477720996428225, 6.973344279481128, 6.99702733674857, 7.018993986952362, 7.039398881707598, 7.05838074246547, 7.07606420342883, 7.0925613982716085, 7.107972757431505, 7.122390497483904, 7.135896331865693, 7.148564584379158, 7.160462481035053, 7.171650884206837, 7.182184941889006, 7.19211467124013, 7.201485476558303, 7.210338061426337, 7.218711020594091, 7.226638008416085, 7.234150171019304, 7.2412759304098255, 7.248041253851942, 7.254469895235493, 7.260583610294684, 7.266402352218298, 7.2719438852573095, 7.277226140609878, 7.282264185124312, 7.287072276064765, 7.291663599808316, 7.296050369146868, 7.300244335952117, 7.304255177519679, 7.30809254770433, 7.3117665651984245, 7.315285158935615, 7.318656198560629, 7.321887018617922, 7.324984680293707, 7.327955342204676, 7.330805056621937, 7.333537360405917, 7.336163498706162, 7.338684114522012, 7.341104295091994, 7.343426872056092, 7.345658183110129, 7.34780381828502, 7.3498645659099395, 7.351845117281368, 7.35374795655119, 7.355577941307152, 7.357336889437725, 7.359021440585157, 7.360636387504235, 7.362183875329735, 7.363669254022425, 7.365093497524585, 7.36645913076835, 7.36776883095147, 7.369051678202045, 7.3702643328734645, 7.371427343711353, 7.372541370847603, 7.373613178736233, 7.374687296665454, 7.37569236150371, 7.376669536194154, 7.37761582398932, 7.378523304482236, 7.379389478094884, 7.380220224154634, 7.381045418613671, 7.381795045311904, 7.382499508582544, 7.383151791996622, 7.383768045551927, 7.384356094225934, 7.384922477693131, 7.385494682418238, 7.386039605808739, 7.386601530895642, 7.387618146458499, 7.389389421614149, 7.391803793770689, 7.392378203928341, 7.391074365104866, 7.391061523151933, 7.390648815578756, 7.391708725877975, 7.390210819170091, 7.391711037205523, 7.391604781309504, 7.392441991199415, 7.390928076016276, 7.39122861454506, 7.39159844931756, 7.390799167949074, 7.39101251511068, 7.390973610242075, 7.390121969529086, 7.390344746065562, 7.391938395976837, 7.393420562056871, 7.394072163992797, 7.394687206619547, 7.394987559978177, 7.396052538897253, 7.395071983200764, 7.395656397916173, 7.395787883244343, 7.39459357003488, 7.393399394378623]
@@ -39,15 +39,6 @@ vQ2 = [3.674184411692731e-20, 8.882156347755832e-11, 0.6668659034845279, 2.30822
 #T = 1, alpha = 0.75, N_chain = 160, maxdim = 80, cutoff = -11, tau = 0.002, jump = 10, boson_dim = 14, omega = 5
 mQ3 = [-1.5734394870880753e-10, 0.00037502139792946316, 0.04482376429483656, 0.15836060616513828, 0.3287224150148531, 0.5395713620062367, 0.7739269563738549, 1.0168090727018446, 1.2566180764840855, 1.4853920607818982, 1.698367160186902, 1.8932432588280996, 2.0694426595536233, 2.227485782410144, 2.3685244744524363, 2.494019954338646, 2.605535007635483, 2.7046086290408367, 2.792686519019119, 2.871087573641152, 2.94099246592658, 3.003445080657642, 3.05936086448405, 3.109538435730957, 3.1546722725901035, 3.195365249740921, 3.2321403864538683, 3.2654515093704264, 3.2956927386521366, 3.323206212901304, 3.3482916837673846, 3.371209318782723, 3.3921873071618567, 3.411425898038437, 3.4291012985157012, 3.4453689932531573, 3.4603665517773847, 3.4742160078557043, 3.487025884104446, 3.4988929052295275, 3.5099034610388062, 3.5201348552992746, 3.5296563810367365, 3.5385302438774042, 3.546811748843059, 3.5545524240775355, 3.5617970531347853, 3.5685865555212506, 3.574957887692708, 3.5809444565772064, 3.586576493798658, 3.5918813849619604, 3.5968839614579156, 3.6016067651208363, 3.606070279189978, 3.6102931402755485, 3.6142923228796113, 3.618082711955473, 3.6216796035130843, 3.625095352732267, 3.6283417894317496, 3.631429760034772, 3.634369218861515, 3.6371693177545126, 3.639838481080982, 3.6423844747659357, 3.6448144682235033, 3.6471350888350416, 3.6493524726095568, 3.651472306074996, 3.6534992862315216, 3.655439471064102, 3.657296862531289, 3.659075718668298, 3.66078001333787, 3.662413458444197, 3.6639795255635046, 3.6654814674731613, 3.6669223332315326, 3.668304984561657, 3.669632109855978, 3.670906239320762, 3.672129752725333, 3.6733048947163245, 3.674433195208073, 3.6755178122401215, 3.6765600599011736, 3.6775617225796013, 3.678524489445574, 3.679449960682206, 3.6803396507107613, 3.6811949977415326, 3.6820173663249425, 3.6828080510387466, 3.68356828340833, 3.684299232914364, 3.6850020131214976, 3.6856776837212872, 3.68632667201778, 3.68695109341923, 3.687551291584923, 3.6881281404924184, 3.6886824734679884, 3.68921508696132, 3.6897267411323176, 3.6902181619716186, 3.6906900441002555, 3.6911430510000494, 3.691577818010488, 3.6919949532194707, 3.6923950378444834, 3.692778629081224, 3.6931456884844014, 3.6934978691004243, 3.693835092747026, 3.694157830339096, 3.6944665326237143, 3.6947616335781457, 3.695043549785443, 3.695312677733939, 3.6955694036297824, 3.695814095489376, 3.6960471073159975, 3.6962687798533462, 3.696479440649476, 3.696679403735934, 3.696868973412044, 3.6970484402808537, 3.6973664148113663, 3.6961819130847373, 3.694761690075027, 3.6951843409930554, 3.695373437707646, 3.6978211727512327, 3.701318202707647, 3.701276697606342, 3.700930746372221, 3.7011305670729575, 3.700296766213168, 3.69910864533066, 3.700222738394754, 3.7018456421965618, 3.7021590057396456, 3.7018544795626287, 3.702751384987736, 3.703512517546288, 3.7039016212185563, 3.704195987007214, 3.703880265726499, 3.7036878022160344, 3.7040135207235982]
 vQ3 = [9.255987564464473e-21, 1.0056776464157568e-10, 0.6674666522547563, 2.3103695321180835, 4.646685090055164, 7.324223547098463, 10.022551783901571, 12.510616610563284, 14.6592973888012, 16.454801931928454, 17.855397823689028, 18.92733670354271, 19.72465068268411, 20.301528067441296, 20.705527848441527, 20.97978289362942, 21.155760426368307, 21.259262571637148, 21.31012520696281, 21.323385443657337, 21.309696893237316, 21.278908950298728, 21.23627770464821, 21.186347635498652, 21.13179761815546, 21.076431161713895, 21.02097645198699, 20.96659855436532, 20.913563033960536, 20.889064058229586, 20.843997271091087, 20.80168633108216, 20.76179538265984, 20.725165325391547, 20.69113430618836, 20.659606457572295, 20.630206941966225, 20.603375438283948, 20.5785916884656, 20.55572242513187, 20.53448225313754, 20.515098333690368, 20.49721006885169, 20.480704585188295, 20.491410655619035, 20.478992921989434, 20.467627383267693, 20.457143756473506, 20.447636252179166, 20.43890181687952, 20.430867150456045, 20.423424964212302, 20.4166014251509, 20.410277330187558, 20.404369141536478, 20.39890190127307, 20.393782037657044, 20.41402932706928, 20.410616037186244, 20.407419782422906, 20.40441016253805, 20.401549084570178, 20.398834130859143, 20.396226772681167, 20.393700887891463, 20.391254496031436, 20.388861519677295, 20.386505033206838, 20.38418318207064, 20.381879631409802, 20.404249817125546, 20.40272352903368, 20.40117500455406, 20.399596274337657, 20.39798204325252, 20.39632991903203, 20.394636055862577, 20.39289813914813, 20.391115366034605, 20.389286514081284, 20.38741130132947, 20.385490146375716, 20.38352353198424, 20.381512463349143, 20.404159068769946, 20.402557590207813, 20.40089648156666, 20.399177442146367, 20.397402349350486, 20.395573278690943, 20.393692433649335, 20.39176213851845, 20.389784811856718, 20.387762927836683, 20.385699007713047, 20.38359559867675, 20.38145525312833, 20.379280511385446, 20.401521234156455, 20.399594524159166, 20.397625122579925, 20.395615582813935, 20.393568437698395, 20.391486169015227, 20.38937124779062, 20.387226083207015, 20.385053032864192, 20.382854407834337, 20.38063246413526, 20.378389388527463, 20.37612730862383, 20.37384828226284, 20.39565339691172, 20.393534017554103, 20.391391546191887, 20.38922801134691, 20.38704537247253, 20.38484554828881, 20.382630397627825, 20.380401717101474, 20.3781612443617, 20.375910702642912, 20.3736517384053, 20.37138597297138, 20.369115030486025, 20.366840496128162, 20.3645639447924, 20.3622869427026, 20.383924777017363, 20.152480866517923, 19.91674309830129, 20.013842328419457, 20.00123147083866, 20.28620909896768, 20.7121556907827, 20.619630616005427, 20.48968187459232, 20.479466016135323, 20.42003778185485, 20.1798444469608, 20.19611276769669, 20.349048399120377, 20.40672409945664, 20.272247252312482, 20.434323469849282, 20.57687137291143, 20.65873860382073, 20.682101489450226, 20.583169859171758, 20.502830613515115, 20.560667604656857]
-
-
-num=120
-mQ1 = mQ1[1:num]
-vQ1 = vQ1[1:num]
-mQ2 = mQ2[1:num]
-vQ2 = vQ2[1:num]
-mQ3 = mQ3[1:num]
-vQ3 = vQ3[1:num]
 
 ω_C = 5
 f(t, α) = α*ω_C*(t)^2 /(1+t^2)
@@ -82,85 +73,126 @@ vQ1_exact = vQ(time_steps, 1.5, 1)
 vQ2_exact = vQ(time_steps, .75, 10)
 vQ3_exact = vQ(time_steps, .75, 1)
 
+
 # Set tick positions and convert tick labels to LaTeX strings automatically
-xticks1 = (0 : 2 : maximum(time_steps[end-1]))[2:end] #range(0.2, stop = maximum(time_steps[end-1]), length = 6)
-xticks2 = (0 : 2 : maximum(time_steps[end-1]))[2:end] #range(0.2, stop = maximum(time_steps[end-1]), length = 6)
-yticks1 = (0 : 2 : 7) 
-yticks2 = (0 : 14 : 50) 
+xticks1 = range(2, stop = 8, length = 2)
+xticks2 = range(2, stop = 8, length = 2)
+xticks3 = range(2, stop = maximum(time_steps[end-30]), length = 3)
+xticks3sub = range(8, stop = maximum(time_steps[end-40]), length = 2)
 
-xtick_labels2 = [string(Int(round(x, digits = 1))) for x in xticks2]
-xtick_labels1 = [" " for x in xticks1]
-ytick_labels1 = [string(Int(round(y, digits = 1))) for y in yticks1]
-ytick_labels2 = [string(Int(round(y, digits = 1))) for y in yticks2]
-#ytick_labels1 = [string(round(y, digits = 1)) for y in yticks1]
-#= ytick_labels1 = [((y == yticks1[1])|| (y == yticks1[end])) ? string(Int(round(y, digits = 1))) : " " for y in yticks1]
-ytick_labels2 = [((y == yticks2[1])|| (y == yticks2[end])) ? string(Int(round(y, digits = 1))) : " " for y in yticks2] =#
+yticks1 = range(0, stop = 7, length = 3)
+yticks2 = range(0, stop = 40, length = 3)
+yticks3 = range(5, stop = 8, length = 2)
+yticks3sub = range(5, stop = 5.7, length = 2)
 
-p1 = plot(time_steps, mQ1_exact, color = :teal, seriesalpha = 1, linewidth = 2, label = false, top_margin = 10mm)
-plot!(time_steps, mQ2_exact, color = :lightcoral, seriesalpha = 1, linewidth = 2, label = false)
-plot!(time_steps, mQ3_exact, color = :lightblue, seriesalpha = 1, linewidth = 2, label = false)
-#scatter!(time_steps[1:2:end], mQ1[1:2:end], markersize=7, markerstrokewidth=1, yaxis = L"\langle Q \rangle_{~~}",  #xaxis = L"tω_C", 
-scatter!(time_steps[1:4:end], mQ1[1:4:end], markersize=6, markerstrokewidth=.5,  #xaxis = L"tω_C", 
-xticks = (xticks1, xtick_labels1), yticks = (yticks1, ytick_labels1),
-xtickfont = font(18), ytickfont = font(18), 
-xguidefontsize=40,yguidefontsize=35, color = :teal, label = L"\  (1, 1.5)")
-#p1.yaxis.set_label_coords(-.1, .5)
-scatter!(time_steps[1:6:end], mQ3[1:6:end], markersize=6, markerstrokewidth=.5, color = :lightblue,label = L"\ (1, 0.75)")
-scatter!(time_steps[4:6:end], mQ2[4:6:end], markersize=6, markerstrokewidth=.5, color = :lightcoral, label = L"\ (0.1, 0.75)")
-#plot!(xticks=true)
-annotate!(-1.2, 3.4, text(L"\langle Q \rangle", 25, :black, :right))
-plot!(legend=false)
-plot!(widen=false)
-plot!(ylims = [0, 7.5])
-vline!([xlims(p1)[2]], lc=:black, lw=2, label = false)
-hline!([ylims(p1)[2]], lc=:black, lw=2, label = false)
+#xtick_labels1 = [string(round(x, digits = 1)) for x in xticks1]
+    xtick_labels1 = [" " for x in xticks1]
+
+xtick_labels2 = [string(round(x, digits = 1)) for x in xticks2]
+xtick_labels3 = [string((round(x, digits = 1))) for x in xticks3]
+xtick_labels3sub = [string((round(x, digits = 1))) for x in xticks3sub]
+ytick_labels1 = [string((round(y, digits = 1))) for y in yticks1]
+ytick_labels2 = [string((round(y, digits = 1))) for y in yticks2]
+ytick_labels3 = [string((round(y, digits = 1))) for y in yticks3]
+ytick_labels3sub = [string((round(y, digits = 1))) for y in yticks3sub]
+
+
+# Plot
+p1 = plot(time_steps, mQ1_exact, color = :teal, seriesalpha = 1, linewidth = 2, label = false)
+plot!(time_steps, mQ3_exact, color = :lightcoral, seriesalpha = 1, linewidth = 2, label = false)
+plot!(time_steps, mQ2_exact, color = :lightblue, seriesalpha = 1, linewidth = 2, label = false)
+scatter!(time_steps[1:4:end], mQ1[1:4:end], markersize = 4, markerstrokewidth = 0.5, xaxis = "", #yaxis = L"\langle Q \rangle", 
+	xticks = (xticks1, xtick_labels1), yticks = (yticks1, ytick_labels1),
+	xtickfont = font(14), ytickfont = font(14),
+	xguidefontsize = 24, yguidefontsize = 22, color = :teal, label = L"\  (1, 1.5)") 
+scatter!(time_steps[1:6:end], mQ3[1:6:end], markersize = 4, markerstrokewidth = 0.5, color = :lightcoral,label = L"\ (1, 0.75)")
+scatter!(time_steps[4:6:end], mQ2[4:6:end], markersize = 4, markerstrokewidth = 0.5, color = :lightblue, label = L"\ (0.1, 0.75)")
+plot!(yaxis = L"⟨Q⟩")
+plot!(legend = false)
+xlims!(0, 10)  
+ylims!(0, 8)  
+plot!(widen = false)
+vline!([xlims(p1)[2]], lc = :black, lw = 2, label = false)
+hline!([ylims(p1)[2]], lc = :black, lw = 2, label = false)
 plot!(grid = false)
+plot!(bottom_margin = -8mm)
+annotate!(9.5, 6, text("(a)", 17, :black, :right))
 ticks_length!(tl=.03)
-#= 
-curves!(twinx(), x, 2 * cos.(x), yaxis = "Y label 2"; kw...)
- =#
 
-p2 = plot(time_steps, vQ1_exact, color = :teal, seriesalpha = 1, linewidth = 2, label = false, top_margin = 10mm)
-plot!(time_steps, vQ2_exact, color = :lightcoral, seriesalpha = 1, linewidth = 2, label = false)
-plot!(time_steps, vQ3_exact, color = :lightblue, seriesalpha = 1, linewidth = 2, label = false)
-scatter!(time_steps[1:3:end], vQ1[1:3:end], markersize=6, markerstrokewidth=.5, color = :teal, seriesalpha = 1, linewidth = 7, label = L"\ \  1.0 \ \  1.50")
-#scatter(time_steps[1:3:end], vQ1[1:3:end], markersize=10, markerstrokewidth=1, color = :teal, seriesalpha = 1, xaxis = L"tω_C", linewidth = 7, label = L"\  (1, 1.5)")
-#scatter!(time_steps[1:2:end], vQ3[1:2:end], markersize=7, markerstrokewidth=1, color = :lightblue,xtickfont = font(24), ytickfont = font(24), xticks = (xticks2, xtick_labels2),  yticks = (yticks2, ytick_labels2),
-#seriesalpha = 1, linewidth = 7, label = L"\ (1, 0.75)",xguidefontsize=40,yguidefontsize=35, yaxis = L"\langle\langle Q^2 \rangle\rangle")
-scatter!(time_steps[4:5:end], vQ3[4:5:end], markersize=6, markerstrokewidth=.5, color = :lightblue,xtickfont = font(18), ytickfont = font(18), xticks = (xticks2, xtick_labels2),  yticks = (yticks2, ytick_labels2),
-seriesalpha = 1, linewidth = 7, label = L"\ \ 1.0 \ \ 0.75",xguidefontsize=25,yguidefontsize=22)
-scatter!(time_steps[2:5:end], vQ2[2:5:end], markersize=6, markerstrokewidth=.5, color = :lightcoral,seriesalpha = 1, linewidth = 7, label = L"\ \ 0.1 \ \ 0.75")
 
+
+
+p2 = plot(time_steps, vQ1_exact, color = :teal, seriesalpha = 1, linewidth = 2, label = false)
+plot!(time_steps, vQ3_exact, color = :lightcoral, seriesalpha = 1, linewidth = 2, label = false)
+plot!(time_steps, vQ2_exact, color = :lightblue, seriesalpha = 1, linewidth = 2, label = false)
+scatter!(time_steps[1:3:end], vQ1[1:3:end], markersize = 4, markerstrokewidth = 0.5, xticks = (xticks2, xtick_labels2), yticks = (yticks2, ytick_labels2), xtickfont = font(14), ytickfont = font(14),
+	xguidefontsize = 24, yguidefontsize = 22, color = :teal, seriesalpha = 1, xaxis = "") #, label = L"\  (1, 1.5)")
+scatter!(time_steps[4:5:end], vQ3[4:5:end], markersize = 4, markerstrokewidth = 0.5, color = :lightcoral) #, label = L"\ (0.1, 0.75)")
+scatter!(time_steps[2:5:end], vQ2[2:5:end], markersize = 4, markerstrokewidth = 0.5, color = :lightblue)
+plot!(widen = false)
+xlims!(0, 10)  
+ylims!(0, 45)  
+plot!(yaxis = L"⟨⟨Q^2⟩⟩")
+plot!(xaxislabel = false)
+vline!([xlims(p2)[2]], lc = :black, lw = 2, label = false)
+hline!([ylims(p2)[2]], lc = :black, lw = 2, label = false)
+plot!(grid = false)
+plot!(legend = false)
+annotate!(9.5, 35, text("(b)", 17, :black, :right))
+ticks_length!(tl=.03)
 plot!(xaxis = L"tω_C")
-plot!(widen=false)
-plot!(ylims = [0, 50], bottom_margin = 10mm)
-vline!([xlims(p2)[2]], lc=:black, lw=2, label = false)
-hline!([ylims(p2)[2]], lc=:black, lw=2, label = false)
-plot!(grid = false)
-plot!(legend = true)
-plot!(legend = :topright)
-plot!(legend = (.8,1.35), grid = false, legendfontsize = 21) #, left_margin = [2mm 0mm], right_margin = [0mm 3mm], bottom_margin = [3mm 3mm])   #,framestyle = :box), legendposition = (1.6, 0.7)
-plot!(legendtitle=L"\ \ \ \ T \ \ \ \ \ \alpha", legendtitlefontsize=23)
-plot!(foreground_color_legend = RGBA(0, 0, 0, 1), background_color_legend =  RGBA(1, 1, 1, 1))
-annotate!(-1.2, 25, text(L"\langle\langle Q^2 \rangle\rangle", 25, :black, :right))
-ticks_length!(tl=.03)
 
-# Create an empty plot for legend only (no axes, no frame)
-p3 = plot(framestyle=:none, grid=false, legendfontsize=25)
-scatter!([], [], markersize=1, markerstrokewidth=.1, color=:teal, label=L"\ \ \  1.0 \ \  1.50")
-scatter!([], [], markersize=1, markerstrokewidth=.1, color=:lightcoral, label=L"\ \ \ 0.1 \ \ 0.75")
-scatter!([], [], markersize=1, markerstrokewidth=.1, color=:lightblue, label=L"\ \ \ 1.0 \ \ 0.75")
-plot!(legendtitle=L"\ \ \ T\ \ \ \ \alpha", legendtitlefontsize=32)
-plot!(foreground_color_legend = :white, background_color_legend = RGBA(0.9, 0.9, 0.9, 0.5))
-#= 
-p4 = plot(framestyle=:none, grid=false)
-custom_layout = @layout [[a;b] [c; d{0.8h,0.5w}]]  # P1 takes 60% of the column height
-p=plot(p1, p2, p4, p3, layout=custom_layout, size = (900, 800), margin = -2.0mm, left_margin = 10mm)
- =#
 
-custom_layout = @layout [a;b]  # P1 takes 60% of the column height
-p=plot(p1, p2, layout=custom_layout, size = (750, 900), margin = -24mm, left_margin = 35mm, right_margin = 10mm)
 
-display("image/png",p)
+p3 = plot(time_steps[10:end], vQ1_exact[10:end]./mQ1_exact[10:end], color = :teal, seriesalpha = 1, linewidth = 2, label = false)
+plot!(time_steps[10:end], vQ3_exact[10:end]./mQ3_exact[10:end], color = :lightcoral, seriesalpha = 1, linewidth = 2, label = false)
+plot!(time_steps[10:end], vQ2_exact[10:end]./mQ2_exact[10:end], color = :lightblue, seriesalpha = 1, linewidth = 2, label = false)
+scatter!(time_steps[8:6:length(vQ1)], vQ1[8:6:end] ./ mQ1[8:6:end], color = :teal, xticks = (xticks3, xtick_labels3), yticks = (yticks3, ytick_labels3), xtickfont = font(14), ytickfont = font(14),
+	xguidefontsize = 24, yguidefontsize = 22, seriesalpha = 1, xaxis = "", markersize = 4, markerstrokewidth = 0.5) #, label = L"\  (1, 1.5)")
+scatter!(time_steps[8:6:length(vQ2)], vQ2[8:6:end] ./ mQ2[8:6:end], markersize = 4, markerstrokewidth = 0.5, color = :lightblue) #, label = L"\ (0.1, 0.75)")
+scatter!(time_steps[8:6:length(vQ3)], vQ3[8:6:end] ./ mQ3[8:6:end], markersize = 4, markerstrokewidth = 0.5, color = :lightcoral)
+plot!(widen = false)
+#plot!(yaxis = L"F")
+ylims!(4.5, 10)  
+xlims!(0, 13)  
+vline!([xlims(p3)[1]], lc = :black, lw = 2, label = false)
+hline!([ylims(p3)[2]], lc = :black, lw = 2, label = false)
+plot!(grid = false, ymirror = true)
+plot!(legend = false)
+annotate!(15, 7, text(L"F", 24, :black, :right))
+ticks_length!(tl=.02)
+plot!(xaxis = L"tω_C")
+annotate!(11, 9.7 , text("(c)", 17, :black, :right)) 
 
-savefig(p, "double_well_e0_d1_ao75_T1_w5_plus.pdf")
+
+plot!(p3, inset=bbox(0.33,0.06,0.4, 0.4), subplot=2)
+
+plot!(p3[2], time_steps[50:end], vQ1_exact[50:end]./mQ1_exact[50:end], color = :teal, seriesalpha = 1, linewidth = 2, label = false)
+plot!(p3[2], time_steps[50:end], vQ3_exact[50:end]./mQ3_exact[50:end], color = :lightcoral, seriesalpha = 1, linewidth = 2, label = false)
+plot!(p3[2], time_steps[50:end], vQ2_exact[50:end]./mQ2_exact[50:end], color = :lightblue, seriesalpha = 1, linewidth = 2, label = false)
+scatter!(p3[2], time_steps[50:6:length(vQ1)], vQ1[50:6:end] ./ mQ1[50:6:end], color = :teal, xticks = (xticks3sub, xtick_labels3sub), yticks = (yticks3sub, ytick_labels3sub), xtickfont = font(12), ytickfont = font(12),
+	xguidefontsize = 10, yguidefontsize = 15, seriesalpha = 1, xaxis = "", markersize = 4, markerstrokewidth = 0.5) #, label = L"\  (1, 1.5)")
+scatter!(p3[2], time_steps[50:6:length(vQ3)], vQ3[50:6:end] ./ mQ3[50:6:end], markersize = 4, markerstrokewidth = 0.5, color = :lightcoral) #, label = L"\ (0.1, 0.75)")
+scatter!(p3[2], time_steps[50:6:length(vQ2)], vQ2[50:6:end] ./ mQ2[50:6:end], markersize = 4, markerstrokewidth = 0.5, color = :lightblue)
+ylims!(p3[2], 5, 5.8)  
+xlims!(p3[2], 7, 12)  
+#= vline!([xlims(p3)[1]], lc = :black, lw = 2, label = false)
+hline!([ylims(p3)[2]], lc = :black, lw = 2, label = false) =#
+plot!(p3[2], grid = false)
+plot!(p3[2], legend = false, aspect_ratio = 5., framestyle = :box)	
+#annotate!(19.7, 4.7, text(L"F", 24, :black, :right))
+#annotate!(14.5, 5.8, text("(c)", 20, :black, :right))
+#plot!(p3[2], xaxis = L"tω_C")
+#plot!(p3[2], xaxis = " ")
+
+
+
+custom_layout = @layout [[a{0.5h}; b{1.35w}] c{0.6w}]
+p = plot(p1, p2, p3, layout = custom_layout, size = (600, 400), left_margin = 5mm, right_margin = 7mm)
+
+
+
+#p=plot(p1, p2, p3, p4, layout=(2,2))
+
+display("image/png", p)
+
