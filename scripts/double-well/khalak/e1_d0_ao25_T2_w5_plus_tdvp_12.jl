@@ -183,9 +183,7 @@ let
 		ab1 .= recur_coeff(w_fn1, supp, N_coeff, Nquad)
 		ab2 .= recur_coeff(w_fn2, supp, N_coeff, Nquad)
 	end
-#@show ab1
 	heat_op = HB(ab1, ab2, s_total)
-	#heat_op_2 = apply(heat_op, heat_op)
 	evol = dw_ham(ω_0, Ω, c_01, c_02, ab1, ab2, s_total)
 
 	# Initialize characteristic function vector
@@ -210,18 +208,18 @@ let
 
 
 	for t in 1:nt
-		U_ψ = tdvp(evol, -1im * tau, U_ψ; nsteps = jump, nsite = 2, normalize = true, cutoff, maxdim)
-#= 		
-		if maxlinkdim(U_ψ) >= maxdim1
+		#U_ψ = tdvp(evol, -1im * tau, U_ψ; nsteps = jump, nsite = 2, normalize = true, cutoff, maxdim)
+		
+		if maxlinkdim(U_ψ) >= maxdim
 			U_ψ = tdvp(evol, -1im*tau, U_ψ; nsteps=10, nsite=1, normalize=true, cutoff=1e-12)
 		else
-			U_ψ = expand(U_ψ, tot_ham; alg="global_krylov", krylovdim=2, cutoff=10^-12)
-			U_ψ = tdvp(tot_ham, -1im*tau/9, U_ψ; nsteps=1, nsite=2, normalize=true, cutoff=1e-10)
-			U_ψ = tdvp(tot_ham, -1im*tau/3, U_ψ; nsteps=2, nsite=1, normalize=true, cutoff=1e-12)
-			U_ψ = tdvp(tot_ham, -1im*tau/9, U_ψ; nsteps=1, nsite=2, normalize=true, cutoff=1e-10)
-			U_ψ = tdvp(tot_ham, -1im*tau/3, U_ψ; nsteps=2, nsite=1, normalize=true, cutoff=1e-12)
-			U_ψ = tdvp(tot_ham, -1im*tau/9, U_ψ; nsteps=1, nsite=2, normalize=true, cutoff=1e-10) 
-		end =#
+			U_ψ = expand(U_ψ, evol; alg="global_krylov", krylovdim=5, cutoff=10^-12)
+			U_ψ = tdvp(evol, -1im*tau/9, U_ψ; nsteps=2, nsite=2, normalize=true, cutoff=1e-12)
+			U_ψ = tdvp(evol, -1im*tau/3, U_ψ; nsteps=2, nsite=1, normalize=true, cutoff=1e-12)
+			U_ψ = tdvp(evol, -1im*tau/9, U_ψ; nsteps=2, nsite=2, normalize=true, cutoff=1e-12)
+			U_ψ = tdvp(evol, -1im*tau/3, U_ψ; nsteps=2, nsite=1, normalize=true, cutoff=1e-12)
+			U_ψ = tdvp(evol, -1im*tau/9, U_ψ; nsteps=2, nsite=2, normalize=true, cutoff=1e-12) 
+		end
 		@show mQ = real(inner(U_ψ', heat_op, U_ψ))
 		@show vQ = real(inner(heat_op, U_ψ, heat_op, U_ψ)) - mQ^2
 		write_for_loop(file_name_txt_m, string(t + 1), string(mQ))
