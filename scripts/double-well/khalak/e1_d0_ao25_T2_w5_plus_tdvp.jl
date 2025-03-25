@@ -116,7 +116,7 @@ let
 	# Define parameters for simulation
 	cut = -13  # Cutoff for singular values
 	cutoff = 10.0^cut
-	maxdim = 100
+	maxdim = 50
 	tau = 0.02  # Time step duration
 	jump = 10  # Number of time steps for each evolution
 	nt = 800  # Number of time steps
@@ -195,7 +195,7 @@ let
 	mean_Q = Float64[]
 	var_Q = Float64[]
 
-	ψ = normalize(expand(ψ, evol; alg="global_krylov", krylovdim=2000, cutoff=10^-9))
+	#ψ = normalize(expand(ψ, evol; alg="global_krylov", krylovdim=2000, cutoff=10^-9))
 
 	# Time evolution of state
 	U_ψ = ψ
@@ -210,9 +210,18 @@ let
 
 
 	for t in 1:nt
-		U_ψ = tdvp(evol, -1im * tau, U_ψ; nsteps = jump, nsite = 2, normalize = true, cutoff, maxdim)
-		#U_ρ_Ud = ITensors.truncate(ITensors.truncate(U_ρ_Ud; maxdim = 10, site_range = (1:(Int(floor(3 * N_chain / 4))))); maxdim = 20, site_range = (tot_chain:tot_chain-(Int(floor((3 * N_chain / 4))))))
-		#orthogonalize!(U_ρ_Ud, S_pos)
+		#U_ψ = tdvp(evol, -1im * tau, U_ψ; nsteps = jump, nsite = 2, normalize = true, cutoff, maxdim)
+		
+		if maxlinkdim(ψ) >= maxdim1
+			U_ψ = tdvp(evol, -1im*tau, ψ; nsteps=10, nsite=1, normalize=true, cutoff=1e-12)
+		else
+			U_ψ = expand(U_ψ, tot_ham; alg="global_krylov", krylovdim=2, cutoff=10^-12)
+			U_ψ = tdvp(tot_ham, -1im*tau/9, U_ψ; nsteps=1, nsite=2, normalize=true, cutoff=1e-10)
+			U_ψ = tdvp(tot_ham, -1im*tau/3, U_ψ; nsteps=2, nsite=1, normalize=true, cutoff=1e-12)
+			U_ψ = tdvp(tot_ham, -1im*tau/9, U_ψ; nsteps=1, nsite=2, normalize=true, cutoff=1e-10)
+			U_ψ = tdvp(tot_ham, -1im*tau/3, U_ψ; nsteps=2, nsite=1, normalize=true, cutoff=1e-12)
+			U_ψ = tdvp(tot_ham, -1im*tau/9, U_ψ; nsteps=1, nsite=2, normalize=true, cutoff=1e-10) 
+		end
 		@show mQ = real(inner(U_ψ', heat_op, U_ψ))
 		@show vQ = real(inner(heat_op, U_ψ, heat_op, U_ψ)) - mQ^2
 		write_for_loop(file_name_txt_m, string(t + 1), string(mQ))
