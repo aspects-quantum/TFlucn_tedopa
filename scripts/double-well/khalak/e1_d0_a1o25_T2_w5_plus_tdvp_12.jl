@@ -116,13 +116,13 @@ let
 	# Define parameters for simulation
 	cut = -13  # Cutoff for singular values
 	cutoff = 10.0^cut
-	maxdim = 50
+	maxdim = 100
 	tau = 0.02  # Time step duration
 	jump = 10  # Number of time steps for each evolution
 	nt = 800  # Number of time steps
 	ttotal = nt * tau  # Total time evolution
 
-	N_chain = 120  # Number of chain sites for a single chain-transformed environment
+	N_chain = 100  # Number of chain sites for a single chain-transformed environment
 	tot_chain = 2 * N_chain + 2  # Total number of chain sites
 	S_pos_t = N_chain + 1
 	S_pos_r = N_chain + 2
@@ -211,13 +211,13 @@ let
 		#U_ψ = tdvp(evol, -1im * tau, U_ψ; nsteps = jump, nsite = 2, normalize = true, cutoff, maxdim)
 		
 		if maxlinkdim(U_ψ) >= maxdim
-			U_ψ = tdvp(evol, -1im*tau, U_ψ; nsteps=10, nsite=1, normalize=true, cutoff=1e-12)
+			U_ψ = tdvp(evol, -1im*tau, U_ψ; nsteps=12, nsite=1, normalize=true, cutoff=1e-12)
 		else
-			U_ψ = expand(U_ψ, evol; alg="global_krylov", krylovdim=5, cutoff=10^-12)
+			U_ψ = expand(U_ψ, evol; alg="global_krylov", krylovdim=10, cutoff=10^-12)
 			U_ψ = tdvp(evol, -1im*tau/9, U_ψ; nsteps=2, nsite=2, normalize=true, cutoff=1e-12)
-			U_ψ = tdvp(evol, -1im*tau/3, U_ψ; nsteps=2, nsite=1, normalize=true, cutoff=1e-12)
+			U_ψ = tdvp(evol, -1im*tau/3, U_ψ; nsteps=4, nsite=1, normalize=true, cutoff=1e-12)
 			U_ψ = tdvp(evol, -1im*tau/9, U_ψ; nsteps=2, nsite=2, normalize=true, cutoff=1e-12)
-			U_ψ = tdvp(evol, -1im*tau/3, U_ψ; nsteps=2, nsite=1, normalize=true, cutoff=1e-12)
+			U_ψ = tdvp(evol, -1im*tau/3, U_ψ; nsteps=4, nsite=1, normalize=true, cutoff=1e-12)
 			U_ψ = tdvp(evol, -1im*tau/9, U_ψ; nsteps=2, nsite=2, normalize=true, cutoff=1e-12) 
 		end
 		@show mQ = real(inner(U_ψ', heat_op, U_ψ))
