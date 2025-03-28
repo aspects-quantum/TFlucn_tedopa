@@ -141,8 +141,8 @@ let
 
 	# Bath parameters
 	ω_C = 5  # Bath cutoff
-	ω_0 = 1  # Spin splitting
-	Ω = 0
+	ω_0 = 0  # Spin splitting
+	Ω = 1
 	model = (ω_0 == 1) ? "local" : "tunnel"
 	model = (Ω == 1) ? "tunnel" : "local"
 
