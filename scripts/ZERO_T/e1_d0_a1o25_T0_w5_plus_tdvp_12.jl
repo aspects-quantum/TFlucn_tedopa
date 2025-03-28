@@ -97,12 +97,12 @@ let
 	nt = 800  # Number of time steps
 	ttotal = nt * tau  # Total time evolution
 
-	N_chain = 130  # Number of chain sites for a single chain-transformed environment
+	N_chain = 140  # Number of chain sites for a single chain-transformed environment
 	tot_chain = N_chain + 2  # Total number of chain sites
 	S_pos_t = 1
 	S_pos_r = 2
 
-	n1_bsn_dim = 8  # Dimension of chain sites
+	n1_bsn_dim = 10  # Dimension of chain sites
 	b_dim = [n1_bsn_dim - round(Int64, (n1_bsn_dim - 1.6) * (i - 1) / (N_chain - 1)) for i in 1:N_chain]  # Dimension of chain sites
 	boson_dim = append!([0, 0], b_dim)
 
@@ -177,13 +177,13 @@ let
 		#U_ψ = tdvp(evol, -1im * tau, U_ψ; nsteps = jump, nsite = 2, normalize = true, cutoff, maxdim)
 		
 		if maxlinkdim(U_ψ) >= maxdim
-			U_ψ = tdvp(evol, -1im*tau, U_ψ; nsteps=10, nsite=1, normalize=true, cutoff=1e-12)
+			U_ψ = tdvp(evol, -1im*tau, U_ψ; nsteps=12, nsite=1, normalize=true, cutoff=1e-12)
 		else
-			U_ψ = expand(U_ψ, evol; alg="global_krylov", krylovdim=10, cutoff=10^-12)
+			U_ψ = expand(U_ψ, evol; alg="global_krylov", krylovdim=15, cutoff=10^-12)
 			U_ψ = tdvp(evol, -1im*tau/9, U_ψ; nsteps=2, nsite=2, normalize=true, cutoff=1e-12)
-			U_ψ = tdvp(evol, -1im*tau/3, U_ψ; nsteps=2, nsite=1, normalize=true, cutoff=1e-12)
+			U_ψ = tdvp(evol, -1im*tau/3, U_ψ; nsteps=2, nsite=1, normalize=true, cutoff=1e-13)
 			U_ψ = tdvp(evol, -1im*tau/9, U_ψ; nsteps=2, nsite=2, normalize=true, cutoff=1e-12)
-			U_ψ = tdvp(evol, -1im*tau/3, U_ψ; nsteps=2, nsite=1, normalize=true, cutoff=1e-12)
+			U_ψ = tdvp(evol, -1im*tau/3, U_ψ; nsteps=2, nsite=1, normalize=true, cutoff=1e-13)
 			U_ψ = tdvp(evol, -1im*tau/9, U_ψ; nsteps=2, nsite=2, normalize=true, cutoff=1e-12) 
 		end
 
