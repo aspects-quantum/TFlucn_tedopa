@@ -76,7 +76,7 @@ end
 
 # Method definitions must be at the top level, not inside functions
 ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = [1.0 1.0; 1.0 1.0] ./ 2.0  # Adjusted normalization of the spin state
-ITensors.state(::StateName"+", ::SiteType"S=1/2") = (1 / sqrt(2)) * [1; 1]  # Density matrix for qudit
+ITensors.state(::StateName"0", ::SiteType"S=1/2") = [1; 0]  # Density matrix for qudit
 ITensors.op(::OpName"0", ::SiteType"Qudit", d::Int) = 1.0I[1:d, 1] * 1.0I[1:d, 1]'
 ITensors.state(::StateName"0", ::SiteType"Qudit", d::Int) = 1.0I[1:d, 1]
 ITensors.op(::OpName"Idd", ::SiteType"Qudit", d::Int) = (1 / d) * Matrix(1.0I, d, d)
@@ -110,7 +110,7 @@ let
 
 	s_total = [(n == S_pos_r) || (n == S_pos_t) ? Index(2, "S=1/2") : Index(boson_dim[n], "Qudit") for n in 1:tot_chain]
 
-	state = [(n == S_pos_r) || (n == S_pos_t) ? "+" : "0" for n in 1:tot_chain]
+	state = [(n == S_pos_r) || (n == S_pos_t) ? "0" : "0" for n in 1:tot_chain]
 	ψ = MPS(s_total, state)
 
 	# Bath parameters
@@ -174,20 +174,22 @@ let
 	write_for_loop(file_name_txt_m, string(2), string(mQ))
 	write_for_loop(file_name_txt_v, string(2), string(vQ))
 
+	U_ψ = expand(U_ψ, evol; alg="global_krylov", krylovdim=500, cutoff=10^-10)
+
 
 	for t in 1:nt
 		#U_ψ = tdvp(evol, -1im * tau, U_ψ; nsteps = jump, nsite = 2, normalize = true, cutoff, maxdim)
-		
-		if maxlinkdim(U_ψ) >= maxdim
+		U_ψ = tdvp(evol, -1im*tau, U_ψ; nsteps=15, nsite=1, normalize=true, cutoff=1e-12)
+		#= if maxlinkdim(U_ψ) >= maxdim
 			U_ψ = tdvp(evol, -1im*tau, U_ψ; nsteps=10, nsite=1, normalize=true, cutoff=1e-12)
 		else
 			U_ψ = expand(U_ψ, evol; alg="global_krylov", krylovdim=20, cutoff=10^-7)
-			U_ψ = tdvp(evol, -1im*tau/9, U_ψ; nsteps=2, nsite=2, normalize=true, cutoff=1e-12)
-			U_ψ = tdvp(evol, -1im*tau/3, U_ψ; nsteps=2, nsite=1, normalize=true, cutoff=1e-12)
-			U_ψ = tdvp(evol, -1im*tau/9, U_ψ; nsteps=2, nsite=2, normalize=true, cutoff=1e-12)
-			U_ψ = tdvp(evol, -1im*tau/3, U_ψ; nsteps=2, nsite=1, normalize=true, cutoff=1e-12)
-			U_ψ = tdvp(evol, -1im*tau/9, U_ψ; nsteps=2, nsite=2, normalize=true, cutoff=1e-12) 
-		end
+			U_ψ = tdvp(evol, -1im*tau/9, U_ψ; nsteps=4, nsite=2, normalize=true, cutoff=1e-12)
+			U_ψ = tdvp(evol, -1im*tau/3, U_ψ; nsteps=4, nsite=1, normalize=true, cutoff=1e-12)
+			U_ψ = tdvp(evol, -1im*tau/9, U_ψ; nsteps=4, nsite=2, normalize=true, cutoff=1e-12)
+			U_ψ = tdvp(evol, -1im*tau/3, U_ψ; nsteps=4, nsite=1, normalize=true, cutoff=1e-12)
+			U_ψ = tdvp(evol, -1im*tau/9, U_ψ; nsteps=4, nsite=2, normalize=true, cutoff=1e-12) 
+		end =#
 
 		orthogonalize!(U_ψ, S_pos_r)
 		@show mQ = real(inner(U_ψ', heat_op, U_ψ))

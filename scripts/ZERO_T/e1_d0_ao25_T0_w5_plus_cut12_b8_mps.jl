@@ -15,9 +15,9 @@ function HB(ab1, s_total)
 	S_pos_r = 2
 
 	ω_n_REAL = ab1[1:N_chain, 1]
-	ω_n_total = append!([0., 0.], ω_n_REAL)
+	ω_n_total = append!([0.0, 0.0], ω_n_REAL)
 	t_n_REAL = sqrt.(ab1[2:N_chain+1, 2])
-	t_n_total = append!([0., 0.], t_n_REAL)
+	t_n_total = append!([0.0, 0.0], t_n_REAL)
 
 	H = OpSum()
 
@@ -34,41 +34,48 @@ function HB(ab1, s_total)
 end
 
 ##########################################################################
-function dw_ham(ω_0, Ω, c_01, ab1, s_total)
+function dw_unit_gates(ω_0, Ω, c_01, ab1, tau, s_total)
 	tot_chain = lastindex(s_total)
 	N_chain = tot_chain - 2
 	S_pos_t = 1
 	S_pos_r = 2
 
 	ω_n_REAL = ab1[1:N_chain, 1]
-	ω_n_total = append!([0., 0.], ω_n_REAL)
+	ω_n_total = append!([0.0, 0.0], ω_n_REAL)
 	t_n_REAL = sqrt.(ab1[2:N_chain+1, 2])
-	t_n_total = append!([0., 0.], t_n_REAL)
+	t_n_total = append!([0.0, 0.0], t_n_REAL)
 
-	ham = OpSum()
+	gates = ITensor[]
 
 	for j in 1:tot_chain-1
 
-
 		if j == S_pos_t
-			ham .-= ω_0, "Sz", j
-			ham .-= Ω, "Sx", j
+			hj = (-ω_0) * op("Sz", s_total[j]) * op("Id", s_total[j+1]) +
+				 (-Ω) * op("Sx", s_total[j]) * op("Id", s_total[j+1])
+			Gj = exp(-im * (tau / 2) * hj)
+			push!(gates, Gj)
 
 		elseif j == S_pos_r
-			ham .+= ω_0, "Sz", j
-			ham .+= Ω, "Sx", j
-			ham .+= c_01, "Sx", j, "A", j + 1
-			ham .+= c_01, "Sx", j, "Adag", j + 1
+			hj = ω_0 * op("Sz", s_total[j]) * op("Id", s_total[j+1]) +
+				 Ω * op("Sx", s_total[j]) * op("Id", s_total[j+1]) +
+				 c_01 * op("Sx", s_total[j]) * op("A", s_total[j+1]) +
+				 c_01 * op("Sx", s_total[j]) * op("Adag", s_total[j+1])
+			Gj = exp(-im * (tau / 2) * hj)
+			push!(gates, Gj)
 		else
+			s1 = s_total[j]
+			s2 = s_total[j+1]
+
 			ω_n = ω_n_total[j]
 			t_n = t_n_total[j]
-			ham .+= ω_n, "N", j
-			ham .+= t_n, "Adag", j, "A", j + 1
-			ham .+= t_n, "A", j, "Adag", j + 1
+			hj = ω_n * op("N", s1) * op("Id", s2) +
+				 t_n * op("Adag", s1) * op("A", s2) +
+				 t_n * op("A", s1) * op("Adag", s2)
+			Gj = exp(-im * (tau / 2) * hj)
+			push!(gates, Gj)
 		end
 	end
-
-	return MPO(ham, s_total)
+	return append!(gates, reverse(gates))
 end
 
 ##########################################################################
@@ -94,12 +101,12 @@ let
 	cut = -13  # Cutoff for singular values
 	cutoff = 10.0^cut
 	maxdim = 100
-	tau = 0.02  # Time step duration
-	jump = 10  # Number of time steps for each evolution
-	nt = 800  # Number of time steps
+	tau = 0.001  # Time step duration
+	jump = 20  # Number of time steps for each evolution
+	nt = 5000  # Number of time steps
 	ttotal = nt * tau  # Total time evolution
 
-	N_chain = 130  # Number of chain sites for a single chain-transformed environment
+	N_chain = 160  # Number of chain sites for a single chain-transformed environment
 	tot_chain = N_chain + 2  # Total number of chain sites
 	S_pos_t = 1
 	S_pos_r = 2
@@ -120,7 +127,7 @@ let
 	model = (ω_0 == 1) ? "local" : "tunnel"
 	model = (Ω == 1) ? "tunnel" : "local"
 
-	T = 0.  # Temperature of bath 
+	T = 0.0  # Temperature of bath 
 	β = 1 / T
 
 	t_list = collect(0:1:nt) * tau
@@ -152,8 +159,8 @@ let
 
 	heat_op = HB(ab1, s_total)
 	heat_op_2 = apply(heat_op, heat_op)
-	evol = dw_ham(ω_0, Ω, c_01, ab1, s_total)
-
+	#evol = dw_ham(ω_0, Ω, c_01, ab1, s_total)
+	evol = apply(dw_unit_gates(ω_0, Ω, c_01, ab1, tau, s_total), MPO(s_total, "Id"); cutoff = 1e-15)
 	# Initialize characteristic function vector
 	char_fn = Vector{ComplexF64}()
 	t_plot = Vector{Float64}()
@@ -177,25 +184,18 @@ let
 
 	for t in 1:nt
 		#U_ψ = tdvp(evol, -1im * tau, U_ψ; nsteps = jump, nsite = 2, normalize = true, cutoff, maxdim)
-		
-		if maxlinkdim(U_ψ) >= maxdim
-			U_ψ = tdvp(evol, -1im*tau, U_ψ; nsteps=10, nsite=1, normalize=true, cutoff=1e-12)
-		else
-			U_ψ = expand(U_ψ, evol; alg="global_krylov", krylovdim=20, cutoff=10^-7)
-			U_ψ = tdvp(evol, -1im*tau/9, U_ψ; nsteps=2, nsite=2, normalize=true, cutoff=1e-12)
-			U_ψ = tdvp(evol, -1im*tau/3, U_ψ; nsteps=2, nsite=1, normalize=true, cutoff=1e-12)
-			U_ψ = tdvp(evol, -1im*tau/9, U_ψ; nsteps=2, nsite=2, normalize=true, cutoff=1e-12)
-			U_ψ = tdvp(evol, -1im*tau/3, U_ψ; nsteps=2, nsite=1, normalize=true, cutoff=1e-12)
-			U_ψ = tdvp(evol, -1im*tau/9, U_ψ; nsteps=2, nsite=2, normalize=true, cutoff=1e-12) 
-		end
+		U_ψ = apply(evol, U_ψ; cutoff)
 
-		orthogonalize!(U_ψ, S_pos_r)
-		@show mQ = real(inner(U_ψ', heat_op, U_ψ))
-		@show vQ = real(inner(heat_op, U_ψ, heat_op, U_ψ)) - mQ^2
-		write_for_loop(file_name_txt_m, string(t + 1), string(mQ))
-		write_for_loop(file_name_txt_v, string(t + 1), string(vQ))
-		push!(mean_Q, mQ)
-		push!(var_Q, vQ)
+		if t % jump == 0
+			orthogonalize!(U_ψ, S_pos_r)
+
+			@show mQ = real(inner(U_ψ', heat_op, U_ψ))
+			@show vQ = real(inner(heat_op, U_ψ, heat_op, U_ψ)) - mQ^2
+			write_for_loop(file_name_txt_m, string(t + 1), string(mQ))
+			write_for_loop(file_name_txt_v, string(t + 1), string(vQ))
+			push!(mean_Q, mQ)
+			push!(var_Q, vQ)
+		end
 
 		@show t * tau
 		@show maxlinkdim(U_ψ)

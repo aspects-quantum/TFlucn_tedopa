@@ -92,7 +92,7 @@ let
 	@show file_name_txt_v
 
 	# Define parameters for simulation
-	cut = -13  # Cutoff for singular values
+	cut = -12  # Cutoff for singular values
 	cutoff = 10.0^cut
 	maxdim = 90
 	tau = 0.002  # Time step duration
@@ -107,7 +107,7 @@ let
 	println(S_pos)
 
 	n1_bsn_dim = 7  # Dimension of chain sites
-	b_dim_real = [n1_bsn_dim - round(Int64, (n1_bsn_dim - 3.6) * (i - 1) / (N_chain - 1)) for i in 1:N_chain]  # Dimension of chain sites
+	b_dim_real = [n1_bsn_dim - round(Int64, (n1_bsn_dim - 1.6) * (i - 1) / (N_chain - 1)) for i in 1:N_chain]  # Dimension of chain sites
 	boson_dim = append!([0], b_dim_real)
 
 	s_total = [(n == S_pos) ? Index(2, "S=1/2") : Index(boson_dim[n], "Qudit") for n in 1:tot_chain]
@@ -179,15 +179,15 @@ let
 	write_for_loop(file_name_txt_v, string(2), string(vQ))
 
 	for t in 1:nt
-		U_ρ_Ud = normalize(apply(evol, U_ρ_Ud; cutoff, maxdim, apply_dag = true))
+		U_ρ_Ud = apply(evol, U_ρ_Ud; cutoff, maxdim, apply_dag = true)
 		#U_ρ_Ud = add(0.5 * swapprime(dag(U_ρ_Ud), 0 => 1), 0.5 * U_ρ_Ud; maxdim = 2 * maxdim)
-		U_ρ_Ud = normalize(ITensors.truncate(U_ρ_Ud; maxdim = 20, site_range = (tot_chain:tot_chain-(Int(floor((3*N_chain / 4)))))))
 		#orthogonalize!(U_ρ_Ud, findfirst(==(maxlinkdim(U_ρ_Ud)), linkdims(U_ρ_Ud)))
 		if t % jump == 1
 			U_ρ_Ud /= tr(U_ρ_Ud)
 			normalize!(U_ρ_Ud)
-			H_U_ρ_Ud = apply(heat_op, U_ρ_Ud; cutoff = 0.1 * cutoff)
-			H_H_U_ρ_Ud = apply(heat_op, H_U_ρ_Ud; cutoff = 0.1 * cutoff)
+			#U_ρ_Ud = normalize(ITensors.truncate(U_ρ_Ud; maxdim = 10, site_range = (S_pos+20:tot_chain)))
+			H_U_ρ_Ud = apply(heat_op, U_ρ_Ud; cutoff = 0.1*cutoff)
+			H_H_U_ρ_Ud = apply(heat_op, H_U_ρ_Ud; cutoff = 0.1*cutoff)
 			@show mQ = real(tr(H_U_ρ_Ud))
 			@show vQ = real(tr(H_H_U_ρ_Ud)) - mQ^2
 			write_for_loop(file_name_txt_m, string(t + 1), string(mQ))
