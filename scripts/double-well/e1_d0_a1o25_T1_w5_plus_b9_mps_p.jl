@@ -126,9 +126,9 @@ let
 	cut = -13  # Cutoff for singular values
 	cutoff = 10.0^cut
 	maxdim = 50
-	tau = 0.002  # Time step duration
-	jump = 10  # Number of time steps for each evolution
-	nt = 1600  # Number of time steps
+	tau = 0.001  # Time step duration
+	jump = 20  # Number of time steps for each evolution
+	nt = 5000  # Number of time steps
 	ttotal = nt * tau  # Total time evolution
 
 	N_chain = 180  # Number of chain sites for a single chain-transformed environment
@@ -137,7 +137,7 @@ let
 
 	println(S_pos)
 
-	n1_bsn_dim = 8  # Dimension of chain sites
+	n1_bsn_dim = 9  # Dimension of chain sites
 	b_dim_real = [n1_bsn_dim - round(Int64, (n1_bsn_dim - 1.6) * (i - 1) / (N_chain - 1)) for i in 1:N_chain]  # Dimension of chain sites
 	b_dim_tilde = [Int(n1_bsn_dim - 4 - round(Int64, (n1_bsn_dim - 4 - 1.6) * (i - 1) / (N_chain - 1))) for i in 1:N_chain]
 	boson_dim = append!(reverse(b_dim_tilde), [0], b_dim_real)
