@@ -128,9 +128,9 @@ let
 	cut = -13  # Cutoff for singular values
 	cutoff = 10.0^cut
 	maxdim = 50
-	tau = 0.002  # Time step duration
+	tau = 0.005  # Time step duration
 	jump = 10  # Number of time steps for each evolution
-	nt = 5000  # Number of time steps
+	nt = 2000  # Number of time steps
 	ttotal = nt * tau  # Total time evolution
 
 	N_chain = 100  # Number of chain sites for a single chain-transformed environment
