@@ -133,7 +133,7 @@ let
 	supp = (0, support_cutoff)  # Support of the weight function
 	Nquad = 10^7  # Reduced number of quadrature points for speed
 	N_coeff = N_chain + 1
-	N_rec = 92
+	N_rec = 95
 	ab1 = Matrix{Float64}(undef, N_coeff, 2)
 
 	# Define functions for the weight functions
