@@ -126,9 +126,9 @@ let
 	cut = -13  # Cutoff for singular values
 	cutoff = 10.0^cut
 	maxdim = 50
-	tau = 0.002  # Time step duration
-	jump = 10  # Number of time steps for each evolution
-	nt = 1600  # Number of time steps
+	tau = 0.001  # Time step duration
+	jump = 20  # Number of time steps for each evolution
+	nt = 5000  # Number of time steps
 	ttotal = nt * tau  # Total time evolution
 
 	N_chain = 180  # Number of chain sites for a single chain-transformed environment
@@ -222,7 +222,7 @@ let
 		U_ψ = apply(evol, U_ψ; cutoff)
 
 		if t % jump == 0
-			orthogonalize!(U_ψ, S_pos)
+			normalize!(U_ψ)
 
 			@show mQ = real(inner(U_ψ', heat_op, U_ψ))
 			@show vQ = real(inner(heat_op, U_ψ, heat_op, U_ψ)) - mQ^2
