@@ -3,6 +3,8 @@ using DrWatson
 
 ITensors.disable_warn_order()
 
+
+##########################################################################
 ##########################################################################
 
 function HB(ab1, ab2, s_total)
@@ -77,8 +79,8 @@ function dw_unit_gates(ω_0, Ω, c_01, c_02, ab1, ab2, tau, s_total)
 				 c_01 * op("Sx", s_total[j]) * op("Adag", s_total[j+1])
 			Gj = exp(-im * (tau / 2) * hj)
 			push!(gates, Gj)
-			hj = (c_02) * op("Sx", s_total[j]) * op("A", s_total[j-1]) +
-				 (c_02) * op("Sx", s_total[j]) * op("Adag", s_total[j-1])
+			hj = c_02 * op("Sx", s_total[j]) * op("A", s_total[j-1]) +
+				 c_02 * op("Sx", s_total[j]) * op("Adag", s_total[j-1])
 			Gj = exp(-im * (tau / 2) * hj)
 			push!(gates, Gj)
 
@@ -101,9 +103,14 @@ function dw_unit_gates(ω_0, Ω, c_01, c_02, ab1, ab2, tau, s_total)
 end
 
 
+##########################################################################
+
+
 # Method definitions must be at the top level, not inside functions
-ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = [1.0 1.0; 1.0 1.0] ./ 2  # Adjusted normalization of the spin state
+ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = [1.0 1.0; 1.0 1.0] ./ 2.0  # Adjusted normalization of the spin state
+ITensors.state(::StateName"+", ::SiteType"S=1/2") = (1 / sqrt(2)) * [1; 1]  # Density matrix for qudit
 ITensors.op(::OpName"0", ::SiteType"Qudit", d::Int) = 1.0I[1:d, 1] * 1.0I[1:d, 1]'
+ITensors.state(::StateName"0", ::SiteType"Qudit", d::Int) = 1.0I[1:d, 1]
 ITensors.op(::OpName"Idd", ::SiteType"Qudit", d::Int) = (1 / d) * Matrix(1.0I, d, d)
 ITensors.op(::OpName"Idd", ::SiteType"S=1/2") = (1 / 2) * Matrix(1.0I, 2, 2)
 
@@ -118,38 +125,36 @@ let
 	# Define parameters for simulation
 	cut = -13  # Cutoff for singular values
 	cutoff = 10.0^cut
-	maxdim = 80
+	maxdim = 50
 	tau = 0.002  # Time step duration
-	jump = 10
-	nt = 3000  # Number of time steps
+	jump = 10  # Number of time steps for each evolution
+	nt = 1600  # Number of time steps
 	ttotal = nt * tau  # Total time evolution
 
-	N_chain = 160  # Number of chain sites for a single chain-transformed environment
-	tot_chain = 2 * N_chain + 1
-	S_pos = N_chain + 1
+	N_chain = 180  # Number of chain sites for a single chain-transformed environment
+	tot_chain = 2 * N_chain + 1  # Total number of chain sites
+	S_pos = N_chain + 1  # Position of the spin site
 
 	println(S_pos)
 
-	n1_bsn_dim = 8  # Dimension of first chain site
+	n1_bsn_dim = 8  # Dimension of chain sites
 	b_dim_real = [n1_bsn_dim - round(Int64, (n1_bsn_dim - 1.6) * (i - 1) / (N_chain - 1)) for i in 1:N_chain]  # Dimension of chain sites
 	b_dim_tilde = [Int(n1_bsn_dim - 4 - round(Int64, (n1_bsn_dim - 4 - 1.6) * (i - 1) / (N_chain - 1))) for i in 1:N_chain]
 	boson_dim = append!(reverse(b_dim_tilde), [0], b_dim_real)
 
 	s_total = [(n == S_pos) ? Index(2, "S=1/2") : Index(boson_dim[n], "Qudit") for n in 1:tot_chain]
-
-	state = [(n == S_pos) ? "ρ" : "0" for n in 1:tot_chain]
-	ρ = MPO(s_total, state)
-	ρ /= tr(ρ)
-	normalize!(ρ)
+	
+	state = [(n == S_pos) ? "+" : "0" for n in 1:tot_chain]
+	ψ = MPS(s_total, state)
 
 	# Bath parameters
 	ω_C = 5  # Bath cutoff
-	ω_0 = 0  # Spin splitting
-	Ω = 1
+	ω_0 = 1  # Spin splitting
+	Ω = 0
 	model = (ω_0 == 1) ? "local" : "tunnel"
 	model = (Ω == 1) ? "tunnel" : "local"
 
-	T = 1  # Temperature of bath
+	T = 1.  # Temperature of bath
 	β = 1 / T
 
 	t_list = collect(0:1:nt) * tau
@@ -187,24 +192,23 @@ let
 		ab2 .= recur_coeff(w_fn2, supp, N_coeff, Nquad)
 	end
 
+
 	heat_op = HB(ab1, ab2, s_total)
-	#evol = dw_unit_gates(ω_0, Ω, c_01, c_02, ab1, ab2, tau, s_total)
-	evol = apply(dw_unit_gates(ω_0, Ω, c_01, c_02, ab1, ab2, tau, s_total), MPO(s_total, "Id"); cutoff = 1e-10)
-	evol_dag = apply(dw_unit_gates(ω_0, Ω, c_01, c_02, ab1, ab2, -tau, s_total), MPO(s_total, "Id"); cutoff = 1e-10)
+	heat_op_2 = apply(heat_op, heat_op)
+	#evol = apply(dw_unit_gates(ω_0, Ω, c_01, c_02, ab1, ab2, tau, s_total), MPO(s_total, "Id"); cutoff = 1e-15)
+	evol = dw_unit_gates(ω_0, Ω, c_01, c_02, ab1, ab2, tau, s_total)
 
 	# Initialize characteristic function vector
 	char_fn = Vector{ComplexF64}()
 	t_plot = Vector{Float64}()
 
-	mean_Q = []
-	var_Q = []
+	mean_Q = Float64[]
+	var_Q = Float64[]
 
-	# Time evolution of density matrix
-	U_ρ_Ud = ρ
-	H_U_ρ_Ud = apply(heat_op, U_ρ_Ud; cutoff = 0.1 * cutoff)
-	H_H_U_ρ_Ud = apply(heat_op, H_U_ρ_Ud; cutoff = 0.1 * cutoff)
-	@show mQ = real(tr(H_U_ρ_Ud))
-	@show vQ = real(tr(H_H_U_ρ_Ud)) - mQ^2
+	# Time evolution of state
+	U_ψ = ψ
+	@show mQ = real(inner(U_ψ', heat_op, U_ψ))
+	@show vQ = real(inner(heat_op, U_ψ, heat_op, U_ψ)) - mQ^2
 	push!(mean_Q, mQ)
 	push!(var_Q, vQ)
 	write_for_loop(file_name_txt_m, string(1), "$(model) boson: T = $T, alpha = $α, N_chain = $N_chain, maxdim = $maxdim, cutoff = $cut, tau = $tau, jump = $jump, boson_dim = $n1_bsn_dim, omega = $ω_C")
@@ -212,31 +216,26 @@ let
 	write_for_loop(file_name_txt_m, string(2), string(mQ))
 	write_for_loop(file_name_txt_v, string(2), string(vQ))
 
+
 	for t in 1:nt
-		U_ρ_Ud = apply(evol, U_ρ_Ud; cutoff)
-		U_ρ_Ud = apply(U_ρ_Ud, evol_dag; cutoff)
 
-		#U_ρ_Ud = add(0.5 * swapprime(dag(U_ρ_Ud), 0 => 1), 0.5 * U_ρ_Ud; maxdim = 2 * maxdim)
-		#U_ρ_Ud = ITensors.truncate(ITensors.truncate(U_ρ_Ud; maxdim = 10, site_range = (1:(Int(floor(3 * N_chain / 4))))); maxdim = 20, site_range = (tot_chain:tot_chain-(Int(floor((3 * N_chain / 4))))))
-		if t % jump == 1
-			U_ρ_Ud /= tr(U_ρ_Ud)
-			normalize!(U_ρ_Ud)
-			orthogonalize!(U_ρ_Ud, S_pos)
+		U_ψ = apply(evol, U_ψ; cutoff)
 
-			H_U_ρ_Ud = apply(heat_op, U_ρ_Ud; cutoff = 0.1 * cutoff)
-			H_H_U_ρ_Ud = apply(heat_op, H_U_ρ_Ud; cutoff = 0.1 * cutoff)
-			@show mQ = real(tr(H_U_ρ_Ud))
-			@show vQ = real(tr(H_H_U_ρ_Ud)) - mQ^2
+		if t % jump == 0
+			orthogonalize!(U_ψ, S_pos)
+
+			@show mQ = real(inner(U_ψ', heat_op, U_ψ))
+			@show vQ = real(inner(heat_op, U_ψ, heat_op, U_ψ)) - mQ^2
 			write_for_loop(file_name_txt_m, string(t + 1), string(mQ))
 			write_for_loop(file_name_txt_v, string(t + 1), string(vQ))
 			push!(mean_Q, mQ)
 			push!(var_Q, vQ)
-
+				
 			@show t * tau
-			@show maxlinkdim(U_ρ_Ud)
+			@show maxlinkdim(U_ψ)
 		end
-	end
 
+	end
 	write_to_file(file_name_txt_m, "$(model) boson: T = $T, alpha = $α, N_chain = $N_chain, maxdim = $maxdim, cutoff = $cut, tau = $tau, jump = $jump, boson_dim = $n1_bsn_dim, omega = $ω_C", string(mean_Q))
 	write_to_file(file_name_txt_v, "$(model) boson: T = $T, alpha = $α, N_chain = $N_chain, maxdim = $maxdim, cutoff = $cut, tau = $tau, jump = $jump, boson_dim = $n1_bsn_dim, omega = $ω_C", string(var_Q))
 end
