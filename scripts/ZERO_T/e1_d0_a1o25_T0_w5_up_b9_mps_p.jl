@@ -80,6 +80,8 @@ end
 # Method definitions must be at the top level, not inside functions
 ITensors.op(::OpName"ρ", ::SiteType"S=1/2") = [1.0 1.0; 1.0 1.0] ./ 2.0  # Adjusted normalization of the spin state
 ITensors.state(::StateName"+", ::SiteType"S=1/2") = (1 / sqrt(2)) * [1; 1]  # Density matrix for qudit
+ITensors.state(::StateName"up", ::SiteType"S=1/2") = [1; 0]  # Density matrix for qudit
+
 ITensors.op(::OpName"0", ::SiteType"Qudit", d::Int) = 1.0I[1:d, 1] * 1.0I[1:d, 1]'
 ITensors.state(::StateName"0", ::SiteType"Qudit", d::Int) = 1.0I[1:d, 1]
 ITensors.op(::OpName"Idd", ::SiteType"Qudit", d::Int) = (1 / d) * Matrix(1.0I, d, d)
@@ -112,7 +114,7 @@ let
 
 	s_total = [(n == S_pos) ? Index(2, "S=1/2") : Index(boson_dim[n], "Qudit") for n in 1:tot_chain]
 
-	state = [(n == S_pos) ? "+" : "0" for n in 1:tot_chain]
+	state = [(n == S_pos) ? "up" : "0" for n in 1:tot_chain]
 	ψ = MPS(s_total, state)
 
 	# Bath parameters
@@ -184,6 +186,7 @@ let
 
 		if t % jump == 0
 			normalize!(U_ψ)
+			ITensors.truncate!(U_ψ; maxdim = 230)
 			@show mQ = real(inner(U_ψ', heat_op, U_ψ))
 			@show vQ = real(inner(heat_op, U_ψ, heat_op, U_ψ)) - mQ^2
 			write_for_loop(file_name_txt_m, string(t + 1), string(mQ))

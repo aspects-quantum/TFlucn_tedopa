@@ -126,9 +126,9 @@ let
 	cut = -13  # Cutoff for singular values
 	cutoff = 10.0^cut
 	maxdim = 50
-	tau = 0.001  # Time step duration
-	jump = 20  # Number of time steps for each evolution
-	nt = 5000  # Number of time steps
+	tau = 0.002  # Time step duration
+	jump = 10  # Number of time steps for each evolution
+	nt = 2500  # Number of time steps
 	ttotal = nt * tau  # Total time evolution
 
 	N_chain = 180  # Number of chain sites for a single chain-transformed environment
@@ -223,7 +223,7 @@ let
 
 		if t % jump == 0
 			normalize!(U_ψ)
-
+			ITensors.truncate!(U_ψ; maxdim = 200)
 			@show mQ = real(inner(U_ψ', heat_op, U_ψ))
 			@show vQ = real(inner(heat_op, U_ψ, heat_op, U_ψ)) - mQ^2
 			write_for_loop(file_name_txt_m, string(t + 1), string(mQ))
