@@ -969,12 +969,33 @@ Sx1 = Sx1[1:num]
 Sx2 = Sx2[1:num]
 
  =#
-ω_C = 5
-
-
-# Time step duration
-tau = 0.002
-
+ ω_C = 5
+ f(t, α) = α*ω_C*(t)^2 /(1+t^2)
+ #= 
+ g(ω, t, β) = (1-cos(ω*t)*coth(β*ω/2)*2*α*ω*exp(-ω/ω_C))
+ vQ(t, α, β) = 0.5 .* [quadgk(g(ω, t[i], β), 0, 10^7) for i in 1:lastindex(t)] =#
+ #= 
+ g(ω, t, β, α) = (1 - cos(ω * t)) * coth(β * ω / 2) * 2 * α * ω * exp(-ω / ω_C)
+ vQ(t, α, β) = 0.5 .* [quadgk(ω -> g(ω, t[i], β, α), 0, 10^7)[2] for i in 1:lastindex(t)]
+  =#
+ 
+ 
+ function vQ(t, α, β, ω_C=5)
+     g(ω, t) = (1 - cos(ω * t/ω_C)) * coth(β * ω / 2) * 2 * α * ω * exp(-ω / ω_C)
+     return 0.5 .* [quadgk(ω -> g(ω, t[i]), 0, 1e5)[1] for i in eachindex(t)]
+ end
+ 
+ 
+ 
+ mQ1_exact = f.(time_steps, 0.25)
+ mQ2_exact = f.(time_steps, 1.25)
+ mQ1_T_exact = f.(time_steps, 0.25)
+ mQ2_T_exact = f.(time_steps, 1.25)
+ 
+ vQ1_exact = vQ(time_steps, 0.25, 100000)
+ vQ2_exact = vQ(time_steps, 1.25, 100000)
+ vQ1_T_exact = vQ(time_steps, .25, 1)
+ vQ2_T_exact = vQ(time_steps, 1.25, 1)
 
 time_steps = collect(0:250) * 0.02 * ω_C
 #time_steps4 = collect(0:lastindex(Sx1_T)-1)*10*tau*ω_C
@@ -988,7 +1009,7 @@ xticks3sub = (10:4:15) #range(10, stop = maximum(time_steps[end-1]), length = 2)
 
 yticks1 = (0:3:6) #range(0, stop = 6, length = 3)
 yticks2 = (0:15:30) #range(0, stop = 30, length = 3)
-yticks3 = (4:2:12) #range(4, stop = 10, length = 4)
+yticks3 = (5:4:12) #range(4, stop = 10, length = 4)
 yticks3sub = range(4.5, stop = 5.5, length = 2)
 
 #xtick_labels1 = [string(round(x, digits = 1)) for x in xticks1]
@@ -1048,7 +1069,7 @@ annotate!(13.3, 26, text("(b)", 12, :black, :right))
 ticks_length!(tl=.03)
 plot!(xaxis = L"tω_C")
 
-gap = 4
+gap = 6
 markersize = 3.3
 
 
@@ -1075,6 +1096,8 @@ scatter!([], [],
     markersize = 1,     # 👈 different marker size!
     color = :brown, markerstrokewidth=.2
 )
+plot!(time_steps[10:end], vQ2_exact[10:end]./mQ2_exact[10:end], color = :teal, seriesalpha = 0.6, linewidth = 2, label = false)
+plot!(time_steps[10:end], vQ2_T_exact[10:end]./mQ2_T_exact[10:end], color = :brown, seriesalpha = 0.6, linewidth = 2, label = false)
 
 scatter!(time_steps[1:gap:length(vQ1)], vQ1[1:gap:end] ./ mQ1[1:gap:end], color = :lightblue, xticks = (xticks3, xtick_labels3), yticks = (yticks3, ytick_labels3), xtickfont = font(14), ytickfont = font(14),
 	xguidefontsize = 20, yguidefontsize = 20, seriesalpha = 1, xaxis = L"tω_C", markersize=markersize, label = "") #, label = L"\  (1, 1.5)")
@@ -1091,7 +1114,7 @@ plot!(grid = false, ymirror = true)
 annotate!(16.5, 7, text(L"F", 18, :black, :right))
 ticks_length!(tl=.02)
 annotate!(13.4, 9.7, text("(c)", 12, :black, :right))
-plot!(legendtitle=L"\ \ \ \ T \ \ \ \ \ \alpha", legendtitlefontsize=11,legend = (.65,.83),legendfontsize = 9)
+plot!(legendtitle=L"\ \ \ \ T \ \ \ \ \ \alpha", legendtitlefontsize=12,legend = (.6,.83),legendfontsize = 12)
 plot!(foreground_color_legend = RGBA(0, 0, 0, 0.1), background_color_legend =  RGBA(0, 0, 0, 0))
 #= plot!(legend = true)
 #plot!(legend = :topright)
