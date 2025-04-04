@@ -1,4 +1,4 @@
-using DrWatson, Plots, LaTeXStrings
+using DrWatson, Plots, LaTeXStrings, QuadGK
 using Plots.PlotMeasures
 
 gr()  # Use GR backend, but you can switch to PyPlot if needed
