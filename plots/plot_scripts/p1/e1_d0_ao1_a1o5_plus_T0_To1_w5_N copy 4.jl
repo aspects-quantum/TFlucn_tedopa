@@ -839,13 +839,13 @@ plot(time_steps, fmQ1.(time_steps), color = :lightblue, seriesalpha = 1, linewid
 plot!(time_steps, fmQ2.(time_steps), color = :teal, seriesalpha = 1, linewidth = 2, label = false)
 plot!(time_steps, fmQ1T.(time_steps), color = :lightcoral, seriesalpha = 1, linewidth = 2, label = false)
 plot!(time_steps, fmQ2T.(time_steps), color = :brown, seriesalpha = 1, linewidth = 2, label = false) =#
-p1 = plot(time_steps[1:6:length(mQ1)], mQ1[1:6:end], linewidth = 3, xaxis = "", 
+p1 = scatter(time_steps[1:10:length(mQ1)], mQ1[1:10:end], linewidth = 3, xaxis = "", 
 	xticks = (xticks1, xtick_labels1), yticks = (yticks1, ytick_labels1),
 	xtickfont = font(14), ytickfont = font(14),
 	xguidefontsize = 24, yguidefontsize = 22, color = :lightblue) 
-plot!(time_steps[1:6:length(mQ2)], mQ2[1:6:end], linewidth = 3, color = :teal) 
-plot!(time_steps[1:6:length(mQ1_T)], mQ1_T[1:6:end], linewidth = 3, color = :lightcoral)
-plot!(time_steps[1:6:length(mQ2_T)], mQ2_T[1:6:end], linewidth = 3, color = :brown)
+scatter!(time_steps[1:10:length(mQ2)], mQ2[1:10:end], linewidth = 3, color = :teal) 
+scatter!(time_steps[5:10:length(mQ1_T)], mQ1_T[5:10:end], linewidth = 3, color = :lightcoral)
+scatter!(time_steps[5:10:length(mQ2_T)], mQ2_T[5:10:end], linewidth = 3, color = :brown)
 plot!(yaxis = L"⟨Q⟩")
 plot!(legend = false)
 xlims!(0, 15)  
@@ -866,7 +866,7 @@ plot!(time_steps, fvQ2.(time_steps), color = :teal, seriesalpha = 1, linewidth =
 plot!(time_steps, fvQ1T.(time_steps), color = :lightcoral, seriesalpha = 1, linewidth = 2, label = false)
 plot!(time_steps, fvQ2T.(time_steps), color = :brown, seriesalpha = 1, linewidth = 2, label = false) =#
 p2 = plot(time_steps[1:6:length(vQ1)], vQ1[1:6:end], linewidth = 3, xticks = (xticks2, xtick_labels2), yticks = (yticks2, ytick_labels2), xtickfont = font(14), ytickfont = font(14),
-	xguidefontsize = 24, yguidefontsize = 22, color = :lightblue, seriesalpha = 1, xaxis = "") #, label = L"\  (1, 1.5)")
+	xguidefontsize = 24, yguidefontsize = 22, color = :lightblue, seriesalpha = 1, xaxis = "tω_C") #, label = L"\  (1, 1.5)")
 plot!(time_steps[1:6:length(vQ2)], vQ2[1:6:end], linewidth = 3, color = :teal) #, label = L"\ (0.1, 0.75)")
 plot!(time_steps[1:6:length(vQ1_T)], vQ1_T[1:6:end], linewidth = 3, color = :lightcoral)
 plot!(time_steps[1:6:length(vQ2_T)], vQ2_T[1:6:end], linewidth = 3, color = :brown)
@@ -881,7 +881,6 @@ plot!(grid = false)
 plot!(legend = false)
 annotate!(14, 24, text("(b)", 17, :black, :right))
 ticks_length!(tl=.03)
-plot!(xaxis = L"tω_C")
 
 
 

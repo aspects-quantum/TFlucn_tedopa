@@ -126,9 +126,9 @@ let
 	cut = -13  # Cutoff for singular values
 	cutoff = 10.0^cut
 	maxdim = 50
-	tau = 0.002  # Time step duration
-	jump = 10  # Number of time steps for each evolution
-	nt = 2500  # Number of time steps
+	tau = 0.001  # Time step duration
+	jump = 20  # Number of time steps for each evolution
+	nt = 4200  # Number of time steps
 	ttotal = nt * tau  # Total time evolution
 
 	N_chain = 180  # Number of chain sites for a single chain-transformed environment
@@ -137,9 +137,9 @@ let
 
 	println(S_pos)
 
-	n1_bsn_dim = 9  # Dimension of chain sites
+	n1_bsn_dim = 10  # Dimension of chain sites
 	b_dim_real = [n1_bsn_dim - round(Int64, (n1_bsn_dim - 1.6) * (i - 1) / (N_chain - 1)) for i in 1:N_chain]  # Dimension of chain sites
-	b_dim_tilde = [Int(n1_bsn_dim - 4 - round(Int64, (n1_bsn_dim - 4 - 1.6) * (i - 1) / (N_chain - 1))) for i in 1:N_chain]
+	b_dim_tilde = [Int(n1_bsn_dim - 5 - round(Int64, (n1_bsn_dim - 5 - 1.6) * (i - 1) / (N_chain - 1))) for i in 1:N_chain]
 	boson_dim = append!(reverse(b_dim_tilde), [0], b_dim_real)
 
 	s_total = [(n == S_pos) ? Index(2, "S=1/2") : Index(boson_dim[n], "Qudit") for n in 1:tot_chain]
@@ -223,7 +223,7 @@ let
 
 		if t % jump == 0
 			normalize!(U_ψ)
-			ITensors.truncate!(U_ψ; maxdim = 200)
+			ITensors.truncate!(U_ψ; maxdim = 230)
 			@show mQ = real(inner(U_ψ', heat_op, U_ψ))
 			@show vQ = real(inner(heat_op, U_ψ, heat_op, U_ψ)) - mQ^2
 			write_for_loop(file_name_txt_m, string(t + 1), string(mQ))

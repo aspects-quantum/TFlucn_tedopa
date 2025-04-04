@@ -86,7 +86,7 @@ yticks3 = range(5, stop = 8, length = 2)
 yticks3sub = range(5, stop = 5.7, length = 2)
 
 #xtick_labels1 = [string(round(x, digits = 1)) for x in xticks1]
-    xtick_labels1 = [" " for x in xticks1]
+xtick_labels1 = [" " for x in xticks1]
 
 xtick_labels2 = [string(round(x, digits = 1)) for x in xticks2]
 xtick_labels3 = [string((round(x, digits = 1))) for x in xticks3]
