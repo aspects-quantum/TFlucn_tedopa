@@ -1,21 +1,12 @@
 module flucn_tedopa
 
-export exp_xHB,unit_gates
-export recur_coeff
-export init_state
-export charfn
-export expectn
+export write_for_loop, write_to_file 
+export recur_coeff 
 
 using Reexport
-@reexport using ITensors, PolyChaos, Plots, LinearAlgebra, QuadGK
+@reexport using ITensors, ITensorMPS, PolyChaos, Plots, LinearAlgebra, QuadGK, LaTeXStrings, HDF5, Dates 
 
+include("textfiles.jl")
 include("recur_coeffs.jl")
-include("ham_gates.jl")
-include("charfn.jl")
-include("init_state.jl")
-include("exp_obs.jl")
-
-
-
 
 end
