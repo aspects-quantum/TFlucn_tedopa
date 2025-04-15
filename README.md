@@ -12,13 +12,14 @@ In this package, we use the ITensor library[^Itensor] in Julia for tensor networ
 
 ***PLEASE NOTE THE FOLLOWING POINTS before running these codes on Julia:***
 
-> The **scripts** files define all the parameters of the model: **scripts\mean_Q.jl** (computes mean heat exchange), **scripts\var_Q.jl** (computes variance of heat exchange), **scripts\obs_exp.jl** (computes expected value of any observable).
+> Each **scripts** file define all the parameters, Hamiltonians and unitary evolutions of the considered model.
+
+> **scripts\e0_d1_a1o25_T1_plus.jl**: independent boson model, $\hat{H} = \epsilon_0 \hat{S}_z +\Delta \hat{S}_x  + \sum_{\nu} \omega_{\nu} \hat{a}^{\dagger}_{\nu} \hat{a}_{\nu} + \hat{S}_x \otimes \sum\nolimits_{\nu} g_{\nu} ( \hat{a}_{\nu} + \hat{a}^{\dagger}_{\nu} )$
 
 > Hamiltonians and Gates are defined in the file **src\ham_gates.jl**.
 
 > Initial state of the (system+environment) is defined in the file **src\init_state.jl**.
 
-> The heat characteristic function[^RMP2009] is calculated in the file **src\charfn.jl**.
 
 &nbsp;
 &NewLine;
