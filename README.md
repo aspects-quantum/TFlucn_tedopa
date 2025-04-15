@@ -12,14 +12,23 @@ In this package, we use the ITensor library[^Itensor] in Julia for tensor networ
 
 ***PLEASE NOTE THE FOLLOWING POINTS before running these codes on Julia:***
 
-> Each **scripts** file define all the parameters, Hamiltonians and unitary evolutions of the considered model.
+We consider the following spin-boson Hamiltonian:
 
-> **scripts\e0_d1_a1o25_T1_plus.jl**: independent boson model, $\hat{H} = \epsilon_0 \hat{S}_z +\Delta \hat{S}_x  + \sum_{\nu} \omega_{\nu} \hat{a}^{\dagger}_{\nu} \hat{a}_{\nu} + \hat{S}_x \otimes \sum\nolimits_{\nu} g_{\nu} ( \hat{a}_{\nu} + \hat{a}^{\dagger}_{\nu} )$
+<img src="https://math.vercel.app/?from=%5Chat%7BH%7D%20%3D%20%5Cepsilon_0%20%5Chat%7BS%7D_z%20%2B%20%5CDelta%20%5Chat%7BS%7D_x%20%2B%20%5Csum_%7B%5Cnu%7D%20%5Comega_%7B%5Cnu%7D%20%5Chat%7Ba%7D%5E%5Cdagger_%7B%5Cnu%7D%20%5Chat%7Ba%7D_%7B%5Cnu%7D%20%2B%20%5Chat%7BS%7D_x%20%5Cotimes%20%5Csum_%7B%5Cnu%7D%20g_%7B%5Cnu%7D%20(%20%5Chat%7Ba%7D_%7B%5Cnu%7D%20%2B%20%5Chat%7Ba%7D%5E%5Cdagger_%7B%5Cnu%7D%20)" alt="Hamiltonian Equation" />
 
-> Hamiltonians and Gates are defined in the file **src\ham_gates.jl**.
+The bosonic bath has the following Ohmic spectral density:
 
-> Initial state of the (system+environment) is defined in the file **src\init_state.jl**.
+<img src="https://math.vercel.app/?from=J(%5Comega)%3D%202%5Calpha%5Comega%5C%2C%20%5Cexp(-%5Comega%2F%5Comega_C)" alt="Spectral Density Function" />
 
+The user can customize the above model Hamiltonian and spectral function for calculating heat fluctuations.
+
+> Each file in **scripts** folder define the particular parameters, Hamiltonians and unitary evolutions of the considered model.
+
+> **scripts\e0_d1_a1o25_T1_plus.jl**: independent boson model, i.e., ε = 0, Δ = 1. We take temperature, T = 1, coupling strength, α = 1.25, and initial state: |+〉.
+
+> **scripts\e1_d0_a1o25_T0_plus.jl**: unbiased boson model, i.e., ε = 1, Δ = 0. We take temperature, T = 0, coupling strength, α = 1.25, and initial state: |+〉.
+
+> **scripts\e1_d0_a1o25_T1_plus.jl**: unbiased boson model, i.e., ε = 1, Δ = 0. We take temperature, T = 1, coupling strength, α = 1.25, and initial state: |+〉.
 
 &nbsp;
 &NewLine;
