@@ -1,6 +1,6 @@
 ## Heat fluctuations using TEDOPA 
 
-This is a package[^SBmodel] for calculating FLUCTUATIONS of heat transfer in the Spin-Boson model[^PRX2020] using the **Time Evolving Density matrices using Orthogonal Polynomial Algorithm (_TEDOPA_)**[^Prior2010][^Chin2010]. 
+This is a package[^SBmodel] for calculating FLUCTUATIONS of heat transfer in the Spin-Boson model[^PRX2020] using the **Time Evolving Density matrices using Orthogonal Polynomial Algorithm (_TEDOPA_)**[^Prior2010][^Chin2010]. The exact method is detailed in the paper "Heat operator approach to quantum stochastic thermodynamics in the strong-coupling regime"(https://arxiv.org/abs/2504.10631). 
 
 We employ the **Thermofield-based chain-mapping approach for open quantum systems**[^PRA2015] that enables us to use a vacuum initial matrix product state (pure) for the environment instead of a thermal state (mixed), thereby speeding up the computation greatly.
 
