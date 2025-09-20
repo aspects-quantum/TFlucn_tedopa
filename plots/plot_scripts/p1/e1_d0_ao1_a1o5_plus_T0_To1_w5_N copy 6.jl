@@ -1,6 +1,6 @@
 using DrWatson, Plots, LaTeXStrings
 using Plots.PlotMeasures
-using PyPlot
+#using PyPlot
 
 gr()  # Use GR backend, but you can switch to PyPlot if needed
 function ticks_length!(; tl = 0.02)
@@ -1141,11 +1141,10 @@ plot!(p3[2], legend = false, aspect_ratio = 5., framestyle = :box)	 =#
 
 
 custom_layout = @layout [[a{0.5h}; b{1.35w}] c{0.6w}]
-p = plot(p1, p2, p3, layout = custom_layout, size = (600, 400), left_margin = 5mm, right_margin = 9mm)
+p = plot(p1, p2, p3, layout = custom_layout, size = (600, 400), left_margin = 5mm, right_margin = 9mm, dpi=600)
 
 
 
 #p=plot(p1, p2, p3, p4, layout=(2,2))
-
 display("image/png", p)
-
+savefig(p, "plot_4.png")
