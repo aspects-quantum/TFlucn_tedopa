@@ -39,7 +39,7 @@ function create_recurr_tedopa(N_chain, nb, types, T_list, α_list, ω_C_list)
 	supp = (0, support_cutoff)  # Support of the weight function
 	Nquad = 10^7  # Reduced number of quadrature points for speed
 	N_coeff = N_chain + 1
-	N_rec = 92
+	N_rec = 90 
 
 	ab = Vector{Any}(undef, nb)
 	c_0 = Vector{Any}(undef, nb)
@@ -219,7 +219,7 @@ let
 	T2 = 1e-30  # Temperature of bath-2 real
 	T_list = [T1, T2, T1, T2]
 
-	α1 = 0.25
+	α1 = 1.25
 	α2 = 0.25
 	α_list = [α1, α2, α1, α2]
 	ω_C_list = [ω_C, ω_C, ω_C, ω_C]
@@ -237,7 +237,7 @@ let
 	mean_J = Float32[]
 	var_J = Float32[]
 
-	N_temp = 120  # Temporary chain length for quick testing
+	N_temp = 140  # Temporary chain length for quick testing
 	s_list = s_total[1:2+nb*N_temp]
 	b_pos_temp = [b1_real_pos[1:N_temp], b2_real_pos[1:N_temp], b1_tilde_pos[1:N_temp]]
 
@@ -248,8 +248,6 @@ let
 	heat_op1 = HB(which_baths, ab_list, types, b_pos_temp, s_list)
 	which_baths = [2]
 	heat_op2 = HB(which_baths, ab_list, types, b_pos_temp, s_list)
-
-	J = heat_op2 - heat_op1
 
 	evol = dw_ham(ω_0, Ω, c_0_list, L, ab_list, S_pos_r, S_pos_t, nb, types, b_pos_temp, s_list)
 	#= @show maxlinkdim(evol0)
@@ -262,8 +260,8 @@ let
 	U_ψ = ψ
 	orthogonalize!(U_ψ, S_pos_r)
 
-	@show mJ = real(inner(U_ψ', J, U_ψ)) / tau
-	@show vJ = real(inner(J, U_ψ, J, U_ψ)) - mJ^2 / tau
+	@show mJ = real(inner(U_ψ', heat_op2 - heat_op1, U_ψ)) / tau
+	@show vJ = real(inner(heat_op2 - heat_op1, U_ψ, heat_op2 - heat_op1, U_ψ)) - mJ^2 / tau
 	push!(mean_J, mJ)
 	push!(var_J, vJ)
 	#= @show mQ2 = real(inner(U_ψ', heat_op2, U_ψ))
@@ -276,14 +274,14 @@ let
 	write_for_loop(file_name_txt_v, string(2), string(vJ))
 
 	for t in 1:nt
-		U_ψ = tdvp(evol, -1im * tau, U_ψ; nsteps = 2, nsite = 2, normalize = true, cutoff = cutoff, maxdim = 120)
+		U_ψ = tdvp(evol, -1im * tau, U_ψ; nsteps = 2, nsite = 2, normalize = true, cutoff = cutoff, maxdim = 160)
 		if t % 10 == 0
 			orthogonalize!(U_ψ, S_pos_r)
 		end
 
 		if t % jump == 0
-			@show mJ = real(inner(U_ψ', J, U_ψ)) / t
-			@show vJ = (real(inner(J, U_ψ, J, U_ψ)) - mJ^2) / t
+			@show mJ = real(inner(U_ψ', heat_op2 - heat_op1, U_ψ)) / t
+			@show vJ = (real(inner(heat_op2 - heat_op1, U_ψ, heat_op2 - heat_op1, U_ψ)) - mJ^2) / t
 			push!(mean_J, mJ)
 			push!(var_J, vJ)
 			write_for_loop(file_name_txt_m, string(t + 1), string(mJ))

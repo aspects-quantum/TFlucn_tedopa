@@ -1,6 +1,9 @@
 using DrWatson
+using Base.Threads
+
 @quickactivate :flucn_tedopa
 
+BLAS.set_num_threads(1)
 ITensors.disable_warn_order()
 
 
@@ -159,7 +162,7 @@ function dw_ham(ω_0, Ω, c_0_list, L, ab_list, S_pos_r, S_pos_t, nb, types, b_p
 		end
 	end
 
-	return MPO(ham, s_list)
+	return MPO(ham, s_list; splitblocks = true)
 end
 ##########################################################################
 
@@ -184,14 +187,17 @@ let
 
 
 	# Define parameters for simulation
-	cut = -14 # Cutoff for singular values
+	cut = -16 # Cutoff for singular values
 	cutoff = 10.0^cut
 	maxdim = 100
-	tau = 0.001  # Time step duration
-	jump = 20 # Number of time steps between recorded data
+	tau = 0.01  # Time step duration
+	jump = 2 # Number of time steps between recorded data
 	nt = 1000  # Number of time steps
 	ttotal = nt * tau  # Total time evolution
+	tdvp_steps = 4 # Number of substeps in each tdvp step
 
+	###############################################################################################
+	# Create system
 	S_pos_r = 2  # Position of the spin site
 	S_pos_t = S_pos_r - 1
 	N_chain = 180  # Number of chain sites for a single chain-transformed environment
@@ -237,7 +243,7 @@ let
 	mean_J = Float32[]
 	var_J = Float32[]
 
-	N_temp = 120  # Temporary chain length for quick testing
+	N_temp = 100  # Temporary chain length for quick testing
 	s_list = s_total[1:2+nb*N_temp]
 	b_pos_temp = [b1_real_pos[1:N_temp], b2_real_pos[1:N_temp], b1_tilde_pos[1:N_temp]]
 
@@ -249,7 +255,9 @@ let
 	which_baths = [2]
 	heat_op2 = HB(which_baths, ab_list, types, b_pos_temp, s_list)
 
-	J = heat_op2 - heat_op1
+	J0 = heat_op2 - heat_op1
+	J0_dag = noprime(linkinds, swapprime(dag(J0), 0 => 1))
+	J = 0.5 * add(J0, J0_dag; cutoff = 1e-17)
 
 	evol = dw_ham(ω_0, Ω, c_0_list, L, ab_list, S_pos_r, S_pos_t, nb, types, b_pos_temp, s_list)
 	#= @show maxlinkdim(evol0)
@@ -262,8 +270,8 @@ let
 	U_ψ = ψ
 	orthogonalize!(U_ψ, S_pos_r)
 
-	@show mJ = real(inner(U_ψ', J, U_ψ)) / tau
-	@show vJ = real(inner(J, U_ψ, J, U_ψ)) - mJ^2 / tau
+	mJ = real(inner(U_ψ', J, U_ψ)) / tau
+	vJ = real(inner(J, U_ψ, J, U_ψ)) - mJ^2 / tau
 	push!(mean_J, mJ)
 	push!(var_J, vJ)
 	#= @show mQ2 = real(inner(U_ψ', heat_op2, U_ψ))
@@ -275,29 +283,91 @@ let
 	write_for_loop(file_name_txt_m, string(2), string(mJ))
 	write_for_loop(file_name_txt_v, string(2), string(vJ))
 
+	maxdim_1site = 100
+	nsites = 2
+
+	# coarse_future will be created *after* the first checkpoint (pipelined)
+	coarse_future = nothing
+	ψ_chk = deepcopy(U_ψ)  # start-of-interval checkpoint
+	last_t = 0
+	@assert iseven(jump) "jump must be even for coarse 2*dt"
+
 	for t in 1:nt
-		U_ψ = tdvp(evol, -1im * tau, U_ψ; nsteps = 2, nsite = 2, normalize = true, cutoff = cutoff, maxdim = 120)
-		if t % 10 == 0
+		@show t * tau
+		@show maxlinkdim(U_ψ)
+
+		if maxlinkdim(U_ψ) >= maxdim_1site
+			nsites = 1
+		end
+
+		# fine (live) evolution with dt = tau
+		U_ψ = tdvp(evol, -1im * tau, U_ψ; nsteps = tdvp_steps, nsite = nsites,
+			normalize = true, cutoff = cutoff, maxdim = maxdim_1site)
+		# orthogonalize occasionally; doing it every step slows things down
+		if (t % 10 == 0)
 			orthogonalize!(U_ψ, S_pos_r)
 		end
 
 		if t % jump == 0
-			@show mJ = real(inner(U_ψ', J, U_ψ)) / t
-			@show vJ = (real(inner(J, U_ψ, J, U_ψ)) - mJ^2) / t
+			# ---- Fine (A) from live state ----
+			J_U_ψ = apply(J, U_ψ; cutoff = 1e-17)
+			e1A   = real(inner(U_ψ, J_U_ψ))
+			e2A   = real(inner(J_U_ψ, J_U_ψ))  # = ||Jψ||^2
+			mA    = e1A / t
+			vA    = (e2A - e1A^2) / t
+
+			# ---- Coarse (B) for this interval ----
+			Δsteps = t - last_t
+			@assert iseven(Δsteps)
+			if coarse_future === nothing
+				# First interval: run coarse synchronously (no pre-launch stall)
+				ψB = deepcopy(ψ_chk)
+				@inbounds for _ in 1:(Δsteps÷2)
+					ψB = tdvp(evol, -1im * (2 * tau), ψB; nsteps = tdvp_steps, nsite = nsites,
+						normalize = true, cutoff = cutoff, maxdim = maxdim_1site)
+				end
+				JψB = apply(J, ψB; cutoff = 1e-17)
+				e1B = real(inner(ψB, JψB))
+				e2B = real(inner(JψB, JψB))
+				mB  = e1B / t
+				vB  = (e2B - e1B^2) / t
+			else
+				mB, vB = fetch(coarse_future)
+			end
+
+			# ---- Richardson (p=1): 2A - B ----
+			@show mJ = (2 * mA - mB) / tau
+			@show vJ = (2 * vA - vB) / tau
 			push!(mean_J, mJ)
 			push!(var_J, vJ)
 			write_for_loop(file_name_txt_m, string(t + 1), string(mJ))
 			write_for_loop(file_name_txt_v, string(t + 1), string(vJ))
-		end
 
-		@show t * tau
-		@show maxlinkdim(U_ψ)
-		#= n_list = []
-		for i in 1:nb*N_temp
-			ni = MPO(OpSum() + (1, "N", 2 + i), s_list)
-			push!(n_list, real(inner(U_ψ', ni, U_ψ)))
+			# ---- Pipeline: update checkpoint and spawn the NEXT coarse run ----
+			ψ_chk  = deepcopy(U_ψ)
+			last_t = t
+			if t + jump <= nt
+				local Tsteps_target = t + jump
+				local ψ_start = ψ_chk
+				coarse_future = @spawn begin
+					ψB2 = deepcopy(ψ_start)
+					@inbounds for _ in 1:(jump÷2)
+						ψB2 = tdvp(evol, -1im * (2 * tau), ψB2; nsteps = tdvp_steps, nsite = nsites,
+							normalize = true, cutoff = cutoff, maxdim = maxdim_1site)
+					end
+					JψB2 = apply(J, ψB2; cutoff = 1e-17)
+					e1B2 = real(inner(ψB2, JψB2))
+					e2B2 = real(inner(JψB2, JψB2))
+					(e1B2 / Tsteps_target, (e2B2 - e1B2^2) / Tsteps_target)
+				end
+			end
 		end
-		@show n_list =#
+		#= n_list = []
+			for i in 1:nb*N_temp
+				ni = MPO(OpSum() + (1, "N", 2 + i), s_list)
+				push!(n_list, real(inner(U_ψ', ni, U_ψ)))
+			end
+			@show n_list =#
 	end
 
 	write_to_file(file_name_txt_m, "$(model) boson: T = [$T1, $T2], alpha = [$α1, $α2], N_chain = $N_chain, maxdim = $maxdim, cutoff = $cut, tau = $tau, jump = $jump, boson_dim = $n1_bsn_dim, omega = $ω_C", string(mean_J))
