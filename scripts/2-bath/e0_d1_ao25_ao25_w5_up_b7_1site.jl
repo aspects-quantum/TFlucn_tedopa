@@ -235,10 +235,6 @@ let
 	ab_list = [ab1, ab2, ab3]
 	c_0_list = [c_01, c_02, c_03, 0]
 
-	#= mean_Q1 = Float64[]
-	var_Q1 = Float64[]
-	mean_Q2 = Float64[]
-	var_Q2 = Float64[] =#
 
 	mean_J = Float32[]
 	var_J = Float32[]
@@ -246,10 +242,11 @@ let
 	N_temp = 100  # Temporary chain length for quick testing
 	s_list = s_total[1:2+nb*N_temp]
 	b_pos_temp = [b1_real_pos[1:N_temp], b2_real_pos[1:N_temp], b1_tilde_pos[1:N_temp]]
+	
+	state = [(n == S_pos_r) || (n == S_pos_t) ? "up" : "0" for n in 1:2+3N_temp] # Initial state
+	ψ = MPS(s_list, state) 
 
-	state = [(n == S_pos_r) || (n == S_pos_t) ? "up" : "0" for n in 1:2+3N_temp]
-	ψ = MPS(s_list, state)
-
+	
 	which_baths = [1, 3]
 	heat_op1 = HB(which_baths, ab_list, types, b_pos_temp, s_list)
 	which_baths = [2]
