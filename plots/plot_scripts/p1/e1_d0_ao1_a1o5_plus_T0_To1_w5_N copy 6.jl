@@ -1,5 +1,5 @@
 using DrWatson, Plots, LaTeXStrings
-using Plots.PlotMeasures
+using Plots.PlotMeasures, QuadGK
 #using PyPlot
 
 gr()  # Use GR backend, but you can switch to PyPlot if needed
@@ -985,7 +985,8 @@ Sx2 = Sx2[1:num]
      return 0.5 .* [quadgk(ω -> g(ω, t[i]), 0, 1e5)[1] for i in eachindex(t)]
  end
  
- 
+ time_steps = collect(0:250) * 0.02 * ω_C
+
  
  mQ1_exact = f.(time_steps, 0.25)
  mQ2_exact = f.(time_steps, 1.25)
@@ -997,7 +998,6 @@ Sx2 = Sx2[1:num]
  vQ1_T_exact = vQ(time_steps, .25, 1)
  vQ2_T_exact = vQ(time_steps, 1.25, 1)
 
-time_steps = collect(0:250) * 0.02 * ω_C
 #time_steps4 = collect(0:lastindex(Sx1_T)-1)*10*tau*ω_C
 
 

@@ -1,5 +1,5 @@
 using DrWatson, Plots, LaTeXStrings
-using Plots.PlotMeasures
+using Plots.PlotMeasures, QuadGK
 
 gr()  # Use GR backend, but you can switch to PyPlot if needed
 function ticks_length!(; tl = 0.02)
