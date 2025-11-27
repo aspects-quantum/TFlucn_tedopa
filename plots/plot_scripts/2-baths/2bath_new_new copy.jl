@@ -1208,6 +1208,19 @@ scatter!(time_steps[2:gap:length(mQ4)], log10.(mQ4[2:gap:end]), markersize = mar
 scatter!(time_steps[1:gap:length(mQ3)], log10.(mQ3[1:gap:end]), markersize = markersize, markerstrokewidth = 0.4, color = :teal)
 scatter!(time_steps[1:gap:length(mQ6)], log10.(mQ6[1:gap:end]), markersize = markersize, markerstrokewidth = 0.4, color = :brown)
 
+# --- double-headed vertical arrow at x = x0 from y1 to y2 ---
+x0, y1, y2 = π, .57, 1.03
+
+plot!([x0, x0], [y1, y2], lw=2, color=:gray50)  # the shaft
+
+# arrowhead size in *data units* (tune this)
+ah = .2 # 0.08 * (maximum(y) - minimum(y))
+
+# arrowheads (two tiny quivers)
+quiver!([x0], [y1], quiver=([0.0], [ -ah ]), lw=2, color=:gray50)
+quiver!([x0], [y2], quiver=([0.0], [ +ah ]), lw=2, color=:gray50)
+
+
 #plot!(yaxis = L"⟨J⟩t^{-1}")
 annotate!(-.075, 0.5, text(L"⟨J\,⟩", 14, :black, :right))
 
@@ -1219,7 +1232,7 @@ vline!([xlims(p1)[2]], lc = :black, lw = 2, label = false)
 hline!([ylims(p1)[2]], lc = :black, lw = 2, label = false)
 plot!(grid = false)
 plot!(bottom_margin = -8mm)
-annotate!(3.3, 1, text(L"\mathrm{(a)}", 12, :black, :right))
+annotate!(3.3, .0, text(L"\mathrm{(a)}", 12, :black, :right))
 ticks_length!(tl = 0.03)
 
 
