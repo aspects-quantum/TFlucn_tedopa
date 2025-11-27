@@ -724,7 +724,7 @@ vQ4 = [2.9019302392483174e-9;
 ]
 
 
-mQ5 = [3.520025319464911e-8;
+mQ5 = [025319464911e-8;
 0.055565495993108074;
 0.10905599511559333;
 0.16481764467798682;
@@ -883,10 +883,23 @@ mQ5 = [3.520025319464911e-8;
 3.6489761589278533;
 3.6459819733937975;
 3.6429100062269946;
+3.6397634116708626;
+3.6365451491349456;
+3.633258152367464;
+3.6299052876359577;
+3.6264893561827938;
+3.623013095637429;
+3.6194791813381326;
+3.6158902275589053;
+3.612248788645938;
+3.608557359907113;
+3.6048183783451364;
+3.6010342264926987;
+3.597207231890731;
 ]
 
 
-vQ5 = [6.761551359358222e-11;
+vQ5 = [.761551359358222e-11;
 0.1444136647987471;
 0.28624315661266775;
 0.4307011086016034;
@@ -1045,9 +1058,20 @@ vQ5 = [6.761551359358222e-11;
 4.539406080585451;
 4.530084951446269;
 4.5164307748591686;
+4.504921379603827;
+4.494104862160434;
+4.483979637344933;
+4.474523950774648;
+4.465697140281822;
+4.457441964678076;
+4.449687851417098;
+4.442354858813845;
+4.435358088339348;
+4.428612194283507;
+4.422035721260215;
+4.415556484432085;
+4.409116308599246;
 ]
-
-
 
 mQ6 = [1.192086427116705e-7;
 0.3261825558983991;
@@ -1141,26 +1165,34 @@ time_steps = collect(0:300) * 0.02 * ω_C
 
 
 # Set tick positions and convert tick labels to LaTeX strings automatically
-xticks1 = [0,1,3] #range(2, stop = 15, length = 3)
-xticks2 = [0,1,3]
-xticks3 = [0,1,3] #range(5, stop = maximum(time_steps[end-1]), length = 3)
+xticks1 = [0,1,2,3] #range(2, stop = 15, length = 3)
+xticks2 = [0,1,2,3]
+xticks3 = [0,1,2,3] #range(5, stop = maximum(time_steps[end-1]), length = 3)
 xticks3sub = (0:1:3.5) #range(10, stop = maximum(time_steps[end-1]), length = 2)
 
 yticks1 = [0, 1, log10(maximum(vcat(mQ1, mQ2, mQ3, mQ4))), round(log10(maximum(vcat(mQ1, mQ2, mQ3, mQ4))))] #range(0, stop = 6, length = 3)
 yticks2 = [0, 2, maximum(log10.(1000.0 .* round.(0.001 .* vcat(vQ1, vQ2, vQ3, vQ4); digits = 1)))] #(0:200:700) #range(0, stop = 30, length = 3)
-yticks3 = [0, minimum(log10.(vQ2[2:end] ./ mQ2[2:end])), 1, maximum(log10.(100.0 .* round.(0.01 .* vcat(vQ1 ./ mQ1, vQ2 ./ mQ2, vQ3 ./ mQ3, vQ4 ./ mQ4); digits = 1)))] #range(4, stop = 10, length = 4)
+yticks3 = [0, minimum(log10.(vQ5[2:end] ./ mQ5[2:end])), 1, maximum(log10.(100.0 .* round.(0.01 .* vcat(vQ1 ./ mQ1, vQ2 ./ mQ2, vQ3 ./ mQ3, vQ4 ./ mQ4); digits = 1)))] #range(4, stop = 10, length = 4)
 yticks3sub = range(-1, stop = 0.5, length = 2)
 
 #xtick_labels1 = [string(round(x, digits = 1)) for x in xticks1]
-xtick_labels1 = [" " for x in xticks1]
+xtick_labels1 = [L"\mathrm{ }" for x in xticks1]
 
-xtick_labels2 = [string(Int(round(x, digits = 1))) for x in xticks2]
+xtick_labels2 = [latexstring(string(Int(round(x, digits = 1)))) for x in xticks2]
+xtick_labels3 = [latexstring(string(Int(round(x, digits = 1)))) for x in xticks3]
+xtick_labels3sub = [latexstring(string(Int(round(x, digits = 1)))) for x in xticks3sub]
+ytick_labels1 = [latexstring(string(Int(round(10^y, digits = 0)))) for y in yticks1]# [string(Int(round(y, digits = 1))) for y in yticks1]
+ytick_labels2 = [latexstring(string(Int(round(10^y, digits = 0)))) for y in yticks2]
+ytick_labels3 = [latexstring(string(round(10^y, digits = 1))) for y in yticks3]
+ytick_labels3sub = [latexstring(string((round(y, digits = 1)))) for y in yticks3sub]
+#= 
+xtick_labels2 = [text(L"\mathrm{$k}") for k in xtick_labels2]
 xtick_labels3 = [string(Int(round(x, digits = 1))) for x in xticks3]
 xtick_labels3sub = [string(Int(round(x, digits = 1))) for x in xticks3sub]
 ytick_labels1 = [string(Int(round(10^y, digits = 0))) for y in yticks1]# [string(Int(round(y, digits = 1))) for y in yticks1]
 ytick_labels2 = [string(Int(round(10^y, digits = 0))) for y in yticks2]
 ytick_labels3 = [string(round(10^y, digits = 1)) for y in yticks3]
-ytick_labels3sub = [string((round(y, digits = 1))) for y in yticks3sub]
+ytick_labels3sub = [string((round(y, digits = 1))) for y in yticks3sub] =#
 
 
 # Plot
@@ -1170,23 +1202,24 @@ p1 = scatter(time_steps[1:gap:length(mQ1)], log10.(mQ1[1:gap:end]), markersize =
 	xticks = (xticks1, xtick_labels1), yticks = (yticks1, ytick_labels1),
 	xtickfont = font(11), ytickfont = font(11),
 	xguidefontsize = 22, yguidefontsize = 17, color = :lightblue)
-scatter!(time_steps[1:gap:length(mQ6)], log10.(mQ6[1:gap:end]), markersize = markersize, markerstrokewidth = 0.4, color = :brown)
 scatter!(time_steps[1:5*gap:length(mQ2)] ./ 5, log10.(mQ2[1:5*gap:end]), markersize = markersize, markerstrokewidth = 0.4, color = :lightcoral)
 scatter!(time_steps[1:5*gap:length(mQ5)] ./ 5, log10.(mQ5[1:5*gap:end]), markersize = markersize, markerstrokewidth = 0.4, color = :mediumpurple4)
-scatter!(time_steps[1:gap:length(mQ3)], log10.(mQ3[1:gap:end]), markersize = markersize, markerstrokewidth = 0.4, color = :teal)
 scatter!(time_steps[2:gap:length(mQ4)], log10.(mQ4[2:gap:end]), markersize = markersize, markerstrokewidth = 0.4, color = :orange)
+scatter!(time_steps[1:gap:length(mQ3)], log10.(mQ3[1:gap:end]), markersize = markersize, markerstrokewidth = 0.4, color = :teal)
+scatter!(time_steps[1:gap:length(mQ6)], log10.(mQ6[1:gap:end]), markersize = markersize, markerstrokewidth = 0.4, color = :brown)
+
 #plot!(yaxis = L"⟨J⟩t^{-1}")
-annotate!(-.075, 0.5, text(L"⟨J\,⟩", 15, :black, :right))
+annotate!(-.075, 0.5, text(L"⟨J\,⟩", 14, :black, :right))
 
 plot!(legend = false)
-xlims!(0, 3.6)
+xlims!(0, 3.48)
 ylims!(-0.6, 1.4)
 plot!(widen = false)
 vline!([xlims(p1)[2]], lc = :black, lw = 2, label = false)
 hline!([ylims(p1)[2]], lc = :black, lw = 2, label = false)
 plot!(grid = false)
 plot!(bottom_margin = -8mm)
-annotate!(3.3, 1, text("(a)", 12, :black, :right))
+annotate!(3.3, 1, text(L"\mathrm{(a)}", 12, :black, :right))
 ticks_length!(tl = 0.03)
 
 
@@ -1195,25 +1228,25 @@ markersize = 3
 p2 = scatter(time_steps[1:gap:length(vQ1)], log10.(vQ1[1:gap:end]), markersize = markersize, markerstrokewidth = 0.4, xaxis = "",
 	xticks = (xticks2, xtick_labels2), yticks = (yticks2, ytick_labels2),
 	xtickfont = font(11), ytickfont = font(11),
-	xguidefontsize = 20, yguidefontsize = 17, color = :lightblue)
+	xguidefontsize = 14, yguidefontsize = 17, color = :lightblue)
 scatter!(time_steps[1:gap:length(vQ6)], log10.(vQ6[1:gap:end]), markersize = markersize, markerstrokewidth = 0.4, color = :brown)
 scatter!(time_steps[1:5*gap:length(vQ2)] ./ 5, log10.(vQ2[1:5*gap:end]), markersize = markersize, markerstrokewidth = 0.4, color = :lightcoral)
 scatter!(time_steps[1:5*gap:length(vQ5)] ./ 5, log10.(vQ5[1:5*gap:end]), markersize = markersize, markerstrokewidth = 0.4, color = :mediumpurple4)
 scatter!(time_steps[1:gap:length(vQ3)], log10.(vQ3[1:gap:end]), markersize = markersize, markerstrokewidth = 0.4, color = :teal)
 scatter!(time_steps[1:gap:length(vQ4)], log10.(vQ4[1:gap:end]), markersize = markersize, markerstrokewidth = 0.4, color = :orange)
 plot!(widen = false)
-xlims!(0, 3.6)
+xlims!(0, 3.48)
 ylims!(-0.7, 3)
 #plot!(yaxis = L"⟨⟨J^2⟩⟩t^{-1}")
-annotate!(-.04, 0.9, text(L"⟨⟨J^2⟩⟩", 15, :black, :right))
+annotate!(-.04, 0.9, text(L"⟨\!\!⟨J^2⟩\!\!⟩", 14, :black, :right))
 #plot!(xaxislabel = false)
 vline!([xlims(p2)[2]], lc = :black, lw = 2, label = false)
 hline!([ylims(p2)[2]], lc = :black, lw = 2, label = false)
 plot!(grid = false)
 plot!(legend = false)
-annotate!(3.3, 1.4, text("(b)", 12, :black, :right))
+annotate!(3.3, 1.4, text(L"\mathrm{(b)}", 12, :black, :right))
 ticks_length!(tl = 0.03)
-#plot!(xaxis = L"tω_C")
+plot!(xaxis = L"t\,ω_C")
 
 gap = 1
 markersize = 3
@@ -1222,22 +1255,7 @@ markersize = 3
 
 
 p3 = scatter([], [],
-	label = L"\ 1.25 \ \ 1.25\ \ 5",
-	markersize = 1,     # 👈 different marker size!
-	color = :orange, markerstrokewidth = 0.2, legendcolumns = 1,
-)
-
-
-
-scatter!([], [],
-	label = L"\ 0.25 \ \ 0.25 \ \ 5",
-	markersize = 1,     # 👈 different marker size!
-	color = :lightblue, markerstrokewidth = 0.2,
-)
-
-
-scatter!([], [],
-	label = L"\  0.25 \ \ 1.25 \ \ 5",
+	label = L"\  0.25 \ \  1.25 \ \ \, 5",
 	markersize = 1,     # 👈 different marker size!
 	color = :teal, markerstrokewidth = 0.2,
 )
@@ -1245,15 +1263,32 @@ scatter!([], [],
 
 
 scatter!([], [],
-	label = L"\  1.25 \ \ 0.25 \ \ 5",
+	label = L"\  1.25 \ \ 0.25 \ \ \, 5",
 	markersize = 1,     # 👈 different marker size!
 	color = :brown, markerstrokewidth = 0.2,
+) 
+
+scatter!([], [],
+	label = L"\ 1.25 \ \ \, 1.25\ \ \, 5",
+	markersize = 1,     # 👈 different marker size!
+	color = :orange, markerstrokewidth = 0.2, legendcolumns = 1,
 )
 
 
 
 scatter!([], [],
-	label = L" \  0.05\ \ 2.50 \ \ 1",
+	label = L"\ 0.25 \ \ 0.25 \; \, \; 5",
+	markersize = 1,     # 👈 different marker size!
+	color = :lightblue, markerstrokewidth = 0.2,
+)
+
+
+
+
+
+
+scatter!([], [],
+	label = L" \  0.05\ \ 2.50 \; \, \; 1",
 	markersize = 1,     # 👈 different marker size!
 	color = :lightcoral, markerstrokewidth = 0.2,
 )
@@ -1261,7 +1296,7 @@ scatter!([], [],
 
 
 scatter!([], [],
-	label = L"\  0.01 \ \ 4.25 \ \ 1",
+	label = L"\  0.01 \ \ 4.25 \ \, \; 1",
 	markersize = 1,     # 👈 different marker size!
 	color = :mediumpurple4, markerstrokewidth = 0.2,
 )
@@ -1272,7 +1307,7 @@ scatter!([], [],
 #plot!(time_steps[10:end], vQ2_T_exact[10:end]./mQ2_T_exact[10:end], color = :brown, seriesalpha = 0.6, linewidth = 2, label = false)
 
 scatter!(time_steps[2:gap:length(vQ1)], log10.(vQ1[2:gap:end] ./ mQ1[2:gap:end]), color = :lightblue, xticks = (xticks3, xtick_labels3), yticks = (yticks3, ytick_labels3), xtickfont = font(11), ytickfont = font(11),
-	xguidefontsize = 20, yguidefontsize = 20, seriesalpha = 1, xaxis = "", markersize = markersize, label = "") #, label = L"\  (1, 1.5)")
+	xguidefontsize = 14, yguidefontsize = 20, seriesalpha = 1, xaxis = "", markersize = markersize, markerstrokewidth = 0.4, label = "") #, label = L"\  (1, 1.5)")
 scatter!(time_steps[2:5*gap:length(vQ2)] ./ 5, log10.(vQ2[2:5*gap:end] ./ mQ2[2:5*gap:end]), markersize = markersize, markerstrokewidth = 0.4, color = :lightcoral, label = "")
 scatter!(time_steps[2:5*gap:length(vQ5)] ./ 5, log10.(vQ5[2:5*gap:end] ./ mQ5[2:5*gap:end]), markersize = markersize, markerstrokewidth = 0.4, color = :mediumpurple4, label = "")
 scatter!(time_steps[2:gap:length(vQ3)], log10.(vQ3[2:gap:end] ./ mQ3[2:gap:end]), markersize = markersize, markerstrokewidth = 0.4, color = :teal, label = "")
@@ -1281,24 +1316,25 @@ plot!(time_steps[2:gap:length(vQ4)], zeros(lastindex(vQ4), 1)[2:gap:end], linest
 scatter!(time_steps[2:gap:length(vQ6)], log10.(vQ6[2:gap:end] ./ mQ6[2:gap:end]), markersize = markersize, markerstrokewidth = 0.4, color = :brown, label = "")
 
 plot!(widen = false)
-ylims!(-0.15, 1.75)
-xlims!(0, 3.6)
+ylims!(-0.08, 1.75)
+xlims!(0, 3.48)
 vline!([xlims(p3)[1]], lc = :black, lw = 2, label = false)
 hline!([ylims(p3)[2]], lc = :black, lw = 2, label = false)
 plot!(grid = false, ymirror = true)
 #plot!(legend = false)
 annotate!(4, 0.7, text(L"F", 15, :black, :right))
 ticks_length!(tl = 0.015)
-annotate!(3.2, 1.64, text("(c)", 12, :black, :right))
-annotate!(2.7, 0.05, text("Poissonian statistics", 10, :gray, :right))
+annotate!(3.2, 1.64, text(L"\mathrm{(c)}", 12, :black, :right))
+annotate!(2.2, 0.05, text(L"\mathrm{Poissonian\ statistics}", 10, :gray, :right))
+plot!(xaxis = L"t\,ω_C")
 
-plot!(legendtitle = L"\ \ \ \alpha_1 \ \ \alpha_2 \ \ \omega_C", legendtitlefontsize = 11, legend = (0.53, 0.61), legendfontsize = 11)
+plot!(legendtitle = L"\ \ \ \ \alpha_1 \ \ \ \ \ \alpha_2 \ \ \ \omega_{c}", legendtitlefontsize = 10, legend = (0.55, 0.59), legendfontsize = 10)
 plot!(foreground_color_legend = RGBA(0, 0, 0, 0.), background_color_legend = RGBA(0, 0, 0, 0))
 
 
 
 custom_layout = @layout [[a{0.5h}; b{1.13w}] c{0.55w}]
-p = plot(p1, p2, p3, layout = custom_layout, size = (580, 370), left_margin = 5mm, right_margin = 1mm, dpi = 600)
+p = plot(p1, p2, p3, layout = custom_layout, size = (550, 370), left_margin = 3mm, right_margin = 1mm, dpi = 600)
 
 
 
