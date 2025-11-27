@@ -268,7 +268,7 @@ let
 	orthogonalize!(U_ψ, S_pos_r)
 
 	mJ = real(inner(U_ψ', J, U_ψ)) / tau
-	vJ = real(inner(J, U_ψ, J, U_ψ)) - mJ^2 / tau
+	vJ = real(inner(J, U_ψ, J, U_ψ) - mJ^2 ) / tau
 	push!(mean_J, mJ)
 	push!(var_J, vJ)
 	#= @show mQ2 = real(inner(U_ψ', heat_op2, U_ψ))
