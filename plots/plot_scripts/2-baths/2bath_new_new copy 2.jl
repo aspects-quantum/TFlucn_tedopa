@@ -1185,15 +1185,6 @@ ytick_labels1 = [latexstring(string(Int(round(10^y, digits = 0)))) for y in ytic
 ytick_labels2 = [latexstring(string(Int(round(10^y, digits = 0)))) for y in yticks2]
 ytick_labels3 = [latexstring(string(round(10^y, digits = 1))) for y in yticks3]
 ytick_labels3sub = [latexstring(string((round(y, digits = 1)))) for y in yticks3sub]
-#= 
-xtick_labels2 = [text(L"\mathrm{$k}") for k in xtick_labels2]
-xtick_labels3 = [string(Int(round(x, digits = 1))) for x in xticks3]
-xtick_labels3sub = [string(Int(round(x, digits = 1))) for x in xticks3sub]
-ytick_labels1 = [string(Int(round(10^y, digits = 0))) for y in yticks1]# [string(Int(round(y, digits = 1))) for y in yticks1]
-ytick_labels2 = [string(Int(round(10^y, digits = 0))) for y in yticks2]
-ytick_labels3 = [string(round(10^y, digits = 1)) for y in yticks3]
-ytick_labels3sub = [string((round(y, digits = 1))) for y in yticks3sub] =#
-
 
 # Plot
 gap = 1
@@ -1249,6 +1240,7 @@ scatter!(time_steps[1:gap:length(vQ3)], log10.(vQ3[1:gap:end]), markersize = mar
 scatter!(time_steps[1:gap:length(vQ4)], log10.(vQ4[1:gap:end]), markersize = markersize, markerstrokewidth = 0.4, color = :orange)
 plot!(widen = false)
 xlims!(0, 3.48)
+plot!(legend = false)
 ylims!(-0.7, 3)
 #plot!(yaxis = L"⟨⟨J^2⟩⟩t^{-1}")
 annotate!(-.04, 0.9, text(L"⟨\!\!⟨J^2⟩\!\!⟩", 14, :black, :right))
@@ -1256,7 +1248,7 @@ annotate!(-.04, 0.9, text(L"⟨\!\!⟨J^2⟩\!\!⟩", 14, :black, :right))
 vline!([xlims(p2)[2]], lc = :black, lw = 2, label = false)
 hline!([ylims(p2)[2]], lc = :black, lw = 2, label = false)
 plot!(grid = false)
-plot!(legend = false)
+
 annotate!(3.3, 1.4, text(L"\mathrm{(b)}", 12, :black, :right))
 ticks_length!(tl = 0.03)
 plot!(xaxis = L"t\,ω_C")
@@ -1264,10 +1256,28 @@ plot!(xaxis = L"t\,ω_C")
 gap = 1
 markersize = 3.25
 
+p3 = scatter(time_steps[2:gap:length(vQ6)], log10.(vQ6[2:gap:end] ./ mQ6[2:gap:end]), grid = false, framestyle = :axes, markersize = markersize, markerstrokewidth = 0.4, color = :brown, label = "", xaxis = false, yticks = ([log10(vQ6[end]/mQ6[end])], [latexstring(string(round(vQ6[end]/mQ6[end], digits = 0)))]), ytickfont = font(15),)
+xlims!(0, 3.48)
+ylims!(2, 2.5)
+plot!(ymirror = true) #widen = false, 
+#plot!(legend = false)
+#ticks_length!(tl = 0.03)
+vline!([xlims(p3)[1]], lc = :black, lw = 2, label = false)
+hline!([ylims(p3)[2]], lc = :black, lw = 2, label = false)
+annotate!(0.008, 1.9, text("|", :black, 8, :center))
+annotate!(0.008, 1.7, text("|", :black, 8, :center))
+annotate!(0.008, 1.5, text("|", :black, 8, :center))
+annotate!(0.008, 1.3, text("|", :black, 8, :center))
+annotate!(0.008, 1.1, text("|", :black, 8, :center))
 
+annotate!(3.48, 1.9, text("|", :black, 8, :center))
+annotate!(3.48, 1.71, text("|", :black, 8, :center))
+#annotate!(3.48, 1.5, text("|", :black, 8, :center))
+annotate!(3.48, 1.3, text("|", :black, 8, :center))
+annotate!(3.48, 1.1, text("|", :black, 8, :center))
+annotate!(3.48, 1.5, text(L"\approx", :black, 15, :center))
 
-
-p3 = scatter([], [],
+p4 = scatter([], [],
 	label = L"\  0.25 \ \  1.25 \ \ \, 5",
 	markersize = 1,     # 👈 different marker size!
 	color = :teal, markerstrokewidth = 0.2,
@@ -1326,10 +1336,10 @@ scatter!(time_steps[2:5*gap:length(vQ5)] ./ 5, log10.(vQ5[2:5*gap:end] ./ mQ5[2:
 scatter!(time_steps[2:gap:length(vQ3)], log10.(vQ3[2:gap:end] ./ mQ3[2:gap:end]), markersize = markersize, markerstrokewidth = 0.4, color = :teal, label = "")
 scatter!(time_steps[2:gap:length(vQ4)], log10.(vQ4[2:gap:end] ./ mQ4[2:gap:end]), markersize = markersize, markerstrokewidth = 0.4, color = :orange, label = "")
 plot!(time_steps[2:gap:length(vQ4)], zeros(lastindex(vQ4), 1)[2:gap:end], linestyle = :dot, color = :gray, seriesalpha = 0.4, linewidth = 2, label = false)
-scatter!(time_steps[2:gap:length(vQ6)], log10.(vQ6[2:gap:end] ./ mQ6[2:gap:end]), markersize = markersize, markerstrokewidth = 0.4, color = :brown, label = "")
+#scatter!(time_steps[2:gap:length(vQ6)], log10.(vQ6[2:gap:end] ./ mQ6[2:gap:end]), markersize = markersize, markerstrokewidth = 0.4, color = :brown, label = "")
 
 plot!(widen = false)
-ylims!(-0.08, 2.37)
+ylims!(-0.05, 1.67)
 xlims!(0, 3.48)
 vline!([xlims(p3)[1]], lc = :black, lw = 2, label = false)
 hline!([ylims(p3)[2]], lc = :black, lw = 2, label = false)
@@ -1337,17 +1347,17 @@ plot!(grid = false, ymirror = true)
 #plot!(legend = false)
 annotate!(4, 0.7, text(L"F", 15, :black, :right))
 ticks_length!(tl = 0.015)
-annotate!(3.2, 1.64, text(L"\mathrm{(c)}", 12, :black, :right))
-annotate!(2.4, 0.05, text(L"\mathrm{Poissonian\ statistics}", 11, :gray, :right))
+annotate!(3, 1.8, text(L"\mathrm{(c)}", 12, :black, :right))
+annotate!(2.6, 0.05, text(L"\mathrm{Poissonian\ statistics}", 11, :gray, :right))
 plot!(xaxis = L"t\,ω_C")
 
-plot!(legendtitle = L"\ \ \ \ \alpha_1 \ \ \ \ \ \alpha_2 \ \ \ \omega_{C}", legendtitlefontsize = 11, legend = (0.5, 0.59), legendfontsize = 11)
+plot!(legendtitle = L"\ \ \ \ \alpha_1 \ \ \ \ \ \alpha_2 \ \ \ \omega_{C}", legendtitlefontsize = 10, legend = (0.49, 0.62), legendfontsize = 10)
 plot!(foreground_color_legend = RGBA(0, 0, 0, 0.), background_color_legend = RGBA(0, 0, 0, 0))
 
 
 
-custom_layout = @layout [[a{0.5h}; b{1.13w}] c{0.55w}]
-p = plot(p1, p2, p3, layout = custom_layout, size = (570, 400), left_margin = 3mm, right_margin = 1mm, dpi = 600)
+custom_layout = @layout [[a{0.5h}; b{1.1w}] [c{0.07h}; d{1.0w}]]
+p = plot(p1, p2, p3, p4, layout = custom_layout, size = (570, 400), left_margin = 3mm, right_margin = 1mm, dpi = 600)
 
 
 
