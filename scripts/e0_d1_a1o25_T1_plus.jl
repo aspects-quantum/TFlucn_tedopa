@@ -4,7 +4,7 @@ using DrWatson
 ITensors.disable_warn_order()
 
 ##########################################################################
-
+##
 function HB(ab1, ab2, s_total)
 
 	tot_chain = length(s_total)
