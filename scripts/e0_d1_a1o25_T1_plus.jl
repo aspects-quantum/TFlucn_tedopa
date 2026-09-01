@@ -9,7 +9,7 @@ function HB(ab1, ab2, s_total)
 
 	tot_chain = length(s_total)
 	S_pos_t = Int(tot_chain / 2)
-	S_pos_r = S_pos_t + 1
+	S_pos_r = S_pos_t + 1 
 
 	ω_n_REAL = ab1[1:S_pos_t-1, 1]
 	ω_n_TILD = ab2[1:S_pos_t-1, 1]
